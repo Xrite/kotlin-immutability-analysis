@@ -1,6 +1,7 @@
 package test.test
 
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
+import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 
@@ -31,6 +32,9 @@ sealed class Dependency {
         }
     }
 
-    data class Outer(val outer: ClassifierDescriptor, val debug: List<Any?> = listOf()) : Dependency()
+    data class Outer(val outer: ClassifierDescriptor, val debug: List<Any?> = listOf()) : Dependency() {
+        companion object {
+        }
+    }
     data class Error(val reason: Any?, val debug: List<Any?> = listOf()) : Dependency()
 } typealias Dependencies = List<Dependency>

@@ -1,11 +1,13 @@
 package test.test
 
 import com.intellij.openapi.project.Project
+import com.tylerthrailkill.helpers.prettyprint.pp
 import org.jetbrains.kotlin.caches.resolve.KotlinCacheService
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.idea.caches.project.productionSourceInfo
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
+import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
 import org.jetbrains.kotlin.platform.jvm.JvmPlatforms
 import org.jetbrains.kotlin.psi.*
@@ -13,6 +15,7 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import org.jetbrains.research.ml.kotlinAnalysis.*
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
+import java.lang.Exception
 import java.nio.file.Path
 import java.util.*
 
@@ -56,24 +59,32 @@ class TestAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
         val properties = PsiProvider.extractElementsOfTypeFromProject(project, KtProperty::class.java).map {
             val desc = it.resolveToDescriptorIfAny()
             desc?.type?.constructor?.declarationDescriptor?.fqNameSafe
-            desc?.type
         }
 
         val classifiers = PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).map {
             val desc = it.resolveToDescriptorIfAny()
-            desc?.typeConstructor?.declarationDescriptor
+            desc?.typeConstructor?.parameters
         }
 
         val extractor = BasicExtractor(rf)
         val entities = makeEntities(rf, project, extractor)
-        val result = solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections)
+        //println(entities)
+        try {
+            val result = solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections)
+            dependenciesDataWriter.writer.println(result)
+        } catch (e: Exception) {
+           println(e.message)
+        }
+        println("ok")
+        //pp(entities)
         //dependenciesDataWriter.writer.println(entities)
-        dependenciesDataWriter.writer.println(result)
+        dependenciesDataWriter.writer.println("entities")
+        dependenciesDataWriter.writer.println(entities)
 
-        dependenciesDataWriter.writer.println("properties")
-        dependenciesDataWriter.writer.println(properties)
-        dependenciesDataWriter.writer.println("classes")
-        dependenciesDataWriter.writer.println(classifiers)
-        dependenciesDataWriter.writer.println("")
+        //dependenciesDataWriter.writer.println("properties")
+        //dependenciesDataWriter.writer.println(properties)
+        //dependenciesDataWriter.writer.println("classes")
+        //dependenciesDataWriter.writer.println(classifiers)
+        //dependenciesDataWriter.writer.println("")
     }
 }

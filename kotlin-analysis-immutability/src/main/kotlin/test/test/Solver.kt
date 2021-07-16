@@ -19,7 +19,7 @@ fun ClassTemplate.calcStatus(
             }
             is Dependency.VarTo -> ImmutabilityStatus.Mutable
             is Dependency.Error -> ImmutabilityStatus.Mutable
-            is Dependency.Outer -> TODO()
+            is Dependency.Outer -> immutability[it.outer]
         }
     }
     return join(neighbors)
@@ -42,7 +42,7 @@ fun ObjectTemplate.calcStatus(
             }
             is Dependency.VarTo -> ImmutabilityStatus.Mutable
             is Dependency.Error -> ImmutabilityStatus.Mutable
-            is Dependency.Outer -> TODO()
+            is Dependency.Outer -> immutability[it.outer]
         }
     }
     return join(neighbors)

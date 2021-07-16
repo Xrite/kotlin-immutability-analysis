@@ -32,7 +32,7 @@ allprojects {
     intellij {
         type = "IC"
         version = "2020.3.3"
-        downloadSources = false
+        downloadSources = true
         setPlugins("java", "Kotlin", "maven", "gradle", "Groovy")
         updateSinceUntilBuild = true
     }
