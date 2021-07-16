@@ -8,7 +8,8 @@ include(
     "kotlin-analysis-clones",
     "kotlin-analysis-dependencies",
     "kotlin-analysis-statistic",
-    "kotlin-analysis-test"
+    "kotlin-analysis-test",
+    "kotlin-analysis-immutability"
 )
 
 sourceControl {
