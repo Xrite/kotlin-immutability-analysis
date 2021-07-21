@@ -21,7 +21,7 @@ object KotlinBasicTypes : Assumptions {
     )
 
     override fun get(name: String): ImmutabilityStatus? = if (name in types) {
-        ImmutabilityStatus.Immutable
+        ImmutabilityStatus.Immutable()
     } else {
         null
     }
@@ -34,18 +34,22 @@ object KotlinCollections : Assumptions {
         "kotlin.collections.List" to ImmutabilityStatus.ConditionallyDeeplyImmutable(setOf(0)),
         "kotlin.collections.Set" to ImmutabilityStatus.ConditionallyDeeplyImmutable(setOf(0)),
         "kotlin.collections.Map" to ImmutabilityStatus.ConditionallyDeeplyImmutable(setOf(0, 1)),
-        "kotlin.collections.MutableIterable" to ImmutabilityStatus.Mutable,
-        "kotlin.collections.MutableCollection" to ImmutabilityStatus.Mutable,
-        "kotlin.collections.MutableList" to ImmutabilityStatus.Mutable,
-        "kotlin.collections.MutableSet" to ImmutabilityStatus.Mutable,
-        "kotlin.collections.MutableMap" to ImmutabilityStatus.Mutable
+        "kotlin.collections.MutableIterable" to ImmutabilityStatus.Mutable(),
+        "kotlin.collections.MutableCollection" to ImmutabilityStatus.Mutable(),
+        "kotlin.collections.MutableList" to ImmutabilityStatus.Mutable(),
+        "kotlin.collections.MutableSet" to ImmutabilityStatus.Mutable(),
+        "kotlin.collections.MutableMap" to ImmutabilityStatus.Mutable()
     )
 
     override fun get(name: String): ImmutabilityStatus? = types[name]
 }
 
-object KotlinCollection : Assumptions {
-    override fun get(name: String): ImmutabilityStatus = TODO()
+object KotlinFunctions : Assumptions {
+    override fun get(name: String): ImmutabilityStatus? = if ("kotlin.Function(0|[1-9][0-9]*)".toRegex().matches(name)) {
+        ImmutabilityStatus.Immutable()
+    } else {
+        null
+    }
 }
 
 object JavaAssumedImmutableTypes : Assumptions {
@@ -80,7 +84,7 @@ object JavaAssumedImmutableTypes : Assumptions {
     )
 
     override fun get(name: String): ImmutabilityStatus? = if (name in types) {
-        ImmutabilityStatus.Immutable
+        ImmutabilityStatus.Immutable()
     } else {
         null
     }

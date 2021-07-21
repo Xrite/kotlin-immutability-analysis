@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.types.KotlinType
 
 sealed class Dependency {
     data class DebugType(val debug: Any?) : Dependency()
+
     data class ValTo(val desc: VariableDescriptor, val type: KotlinType, val debug: List<Any?> = listOf()) :
         Dependency() {
         companion object {
@@ -36,5 +37,7 @@ sealed class Dependency {
         companion object {
         }
     }
+
     data class Error(val reason: Any?, val debug: List<Any?> = listOf()) : Dependency()
+
 } typealias Dependencies = List<Dependency>

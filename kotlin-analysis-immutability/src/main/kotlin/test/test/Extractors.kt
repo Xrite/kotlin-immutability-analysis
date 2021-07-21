@@ -1,18 +1,11 @@
 package test.test
 
 import com.intellij.openapi.project.Project
-import org.jetbrains.kotlin.codegen.kotlinType
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
-import org.jetbrains.kotlin.idea.caches.resolve.analyze
-import org.jetbrains.kotlin.idea.caches.resolve.analyzeWithContentAndGetResult
-import org.jetbrains.kotlin.idea.caches.resolve.getResolutionFacade
-import org.jetbrains.kotlin.idea.caches.resolve.resolveToCall
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
-import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
-import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 
 interface Extractor<R> {
@@ -107,9 +100,9 @@ fun multipleExtractors(extractors: List<Extractor<Dependencies>>) = object : Ext
 
 class Packer(val resolutionFacade: ResolutionFacade?) {
     fun packClass(ktClass: KtClass, deps: Dependencies): Entity {
-        val type = ktClass.resolveToDescriptorIfAny(resolutionFacade)
-        return type?.let {
-            ClassTemplate(it, deps)
+        val descriptor = ktClass.resolveToDescriptorIfAny(resolutionFacade)
+        return descriptor?.let {
+            ClassTemplate(it, deps, it.typeConstructor.parameters)
         } ?: ErrorTemplate
     }
 

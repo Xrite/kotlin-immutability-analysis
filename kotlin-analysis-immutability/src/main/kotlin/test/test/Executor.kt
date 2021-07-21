@@ -1,7 +1,6 @@
 package test.test
 
 import com.intellij.openapi.project.Project
-import com.tylerthrailkill.helpers.prettyprint.pp
 import org.jetbrains.kotlin.caches.resolve.KotlinCacheService
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
@@ -31,9 +30,9 @@ fun KtProperty.resolveToDescriptorIfAny(
     if (resolutionFacade == null) resolveToDescriptorIfAny(bodyResolveMode)
     else resolveToDescriptorIfAny(resolutionFacade, bodyResolveMode)
 
-class TestAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
-    private val dependenciesDataWriter = PrintWriterResourceManager(outputDir, "test_output.txt")
-    override val controlledResourceManagers: Set<ResourceManager> = setOf(dependenciesDataWriter)
+class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
+    private val dataWriter = PrintWriterResourceManager(outputDir, "test_output.txt")
+    override val controlledResourceManagers: Set<ResourceManager> = setOf(dataWriter)
 
     override fun analyse(project: Project) {
 
@@ -58,28 +57,34 @@ class TestAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
         }
         val properties = PsiProvider.extractElementsOfTypeFromProject(project, KtProperty::class.java).map {
             val desc = it.resolveToDescriptorIfAny()
-            desc?.type?.constructor?.declarationDescriptor?.fqNameSafe
+            desc?.name to desc?.type?.arguments?.map {
+                it.type.fqName?.asString()
+            }
         }
 
         val classifiers = PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).map {
             val desc = it.resolveToDescriptorIfAny()
-            desc?.typeConstructor?.parameters
+
+            desc?.typeConstructor to desc?.typeConstructor?.parameters?.map { it.fqNameSafe.asString() }
         }
 
         val extractor = BasicExtractor(rf)
         val entities = makeEntities(rf, project, extractor)
         //println(entities)
         try {
-            val result = solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections)
-            dependenciesDataWriter.writer.println(result)
+            val result = solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections, KotlinFunctions)
+            dataWriter.writer.println(result)
+            dataWriter.writer.println()
         } catch (e: Exception) {
            println(e.message)
         }
         println("ok")
+        println(properties)
+        println(classifiers)
         //pp(entities)
         //dependenciesDataWriter.writer.println(entities)
-        dependenciesDataWriter.writer.println("entities")
-        dependenciesDataWriter.writer.println(entities)
+        //dataWriter.writer.println("entities")
+        //dataWriter.writer.println(entities)
 
         //dependenciesDataWriter.writer.println("properties")
         //dependenciesDataWriter.writer.println(properties)

@@ -1,25 +1,55 @@
 package test.test
 
-import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
+import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
+import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
+
+fun ClassTemplate.resolveParameters(result: Immutability.Result): ImmutabilityStatus = when (result) {
+    is Immutability.Result.ConditionallyDeeplyImmutable -> {
+        val conditionNames = result.conditions.mapNotNull {
+            it.type.fqName?.asString()
+        }.toSet()
+        val indices = this.parameters.mapNotNull {
+            val name = it.fqNameSafe.asString()
+            if (name in conditionNames) {
+                it.index
+            } else {
+                null
+            }
+        }.toSet()
+        ImmutabilityStatus.ConditionallyDeeplyImmutable(indices)
+    }
+    Immutability.Result.Immutable -> ImmutabilityStatus.Immutable()
+    Immutability.Result.Mutable -> ImmutabilityStatus.Mutable()
+    Immutability.Result.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable()
+}
+
+fun ObjectTemplate.resolveParameters(result: Immutability.Result): ImmutabilityStatus = when (result) {
+    is Immutability.Result.ConditionallyDeeplyImmutable -> {
+        throw Exception("Object $this depends on type arguments ${result.conditions}")
+    }
+    Immutability.Result.Immutable -> ImmutabilityStatus.Immutable()
+    Immutability.Result.Mutable -> ImmutabilityStatus.Mutable()
+    Immutability.Result.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable()
+}
 
 fun ClassTemplate.calcStatus(
     immutability: Immutability
 ): ImmutabilityStatus {
     val neighbors = this.dependencies.map {
         when (it) {
-            is Dependency.DebugType -> ImmutabilityStatus.Immutable
-            is Dependency.Parent -> immutability[it.type]
+            is Dependency.DebugType -> ImmutabilityStatus.Immutable()
+            is Dependency.Parent -> this.resolveParameters(immutability[it.type])
             is Dependency.ValTo -> {
-                when(val status = immutability[it.type]) {
+                when (val status = this.resolveParameters(immutability[it.type])) {
                     is ImmutabilityStatus.ConditionallyDeeplyImmutable -> status
-                    ImmutabilityStatus.Immutable -> status
-                    ImmutabilityStatus.Mutable -> ImmutabilityStatus.ShallowImmutable
-                    ImmutabilityStatus.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable
+                    is ImmutabilityStatus.Immutable -> status
+                    is ImmutabilityStatus.Mutable -> ImmutabilityStatus.ShallowImmutable()
+                    is ImmutabilityStatus.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable()
                 }
             }
-            is Dependency.VarTo -> ImmutabilityStatus.Mutable
-            is Dependency.Error -> ImmutabilityStatus.Mutable
-            is Dependency.Outer -> immutability[it.outer]
+            is Dependency.VarTo -> ImmutabilityStatus.Mutable()
+            is Dependency.Error -> ImmutabilityStatus.Mutable()
+            is Dependency.Outer -> this.resolveParameters(immutability[it.outer])
         }
     }
     return join(neighbors)
@@ -30,19 +60,19 @@ fun ObjectTemplate.calcStatus(
 ): ImmutabilityStatus {
     val neighbors = this.dependencies.map {
         when (it) {
-            is Dependency.DebugType -> ImmutabilityStatus.Immutable
-            is Dependency.Parent -> immutability[it.type]
+            is Dependency.DebugType -> ImmutabilityStatus.Immutable()
+            is Dependency.Parent -> this.resolveParameters(immutability[it.type])
             is Dependency.ValTo -> {
-                when(val status = immutability[it.type]) {
+                when (val status = this.resolveParameters(immutability[it.type])) {
                     is ImmutabilityStatus.ConditionallyDeeplyImmutable -> status
-                    ImmutabilityStatus.Immutable -> status
-                    ImmutabilityStatus.Mutable -> ImmutabilityStatus.ShallowImmutable
-                    ImmutabilityStatus.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable
+                    is ImmutabilityStatus.Immutable -> status
+                    is ImmutabilityStatus.Mutable -> ImmutabilityStatus.ShallowImmutable()
+                    is ImmutabilityStatus.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable()
                 }
             }
-            is Dependency.VarTo -> ImmutabilityStatus.Mutable
-            is Dependency.Error -> ImmutabilityStatus.Mutable
-            is Dependency.Outer -> immutability[it.outer]
+            is Dependency.VarTo -> ImmutabilityStatus.Mutable()
+            is Dependency.Error -> ImmutabilityStatus.Mutable()
+            is Dependency.Outer -> this.resolveParameters(immutability[it.outer])
         }
     }
     return join(neighbors)
@@ -85,8 +115,7 @@ fun solve(entities: List<Entity>, vararg assumptions: Assumptions): Immutability
             val newStatus = when (entity) {
                 is ClassTemplate -> entity.calcStatus(immutability)
                 is ObjectTemplate -> entity.calcStatus(immutability)
-                //is ParameterizedClassTemplate -> entity.calcStatus(mp, index)
-                ErrorTemplate -> ImmutabilityStatus.Mutable
+                ErrorTemplate -> ImmutabilityStatus.Mutable()
             }
             if (immutability.update(entity, newStatus)) {
                 updated = true

@@ -1,39 +1,61 @@
 package test.test
 
 sealed class ImmutabilityStatus {
-    object Immutable : ImmutabilityStatus() {
+    data class Immutable(val reasons: List<ImmutableReason> = listOf()) : ImmutabilityStatus() {
         override fun toString(): String {
             return "Immutable"
         }
     }
 
-    object ShallowImmutable : ImmutabilityStatus() {
+    data class ShallowImmutable(val reasons: List<ShallowImmutableReason> = listOf()) : ImmutabilityStatus() {
         override fun toString(): String {
             return "ShallowImmutable"
         }
     }
 
-    data class ConditionallyDeeplyImmutable(val conditions: Set<Int>) : ImmutabilityStatus()
-    object Mutable : ImmutabilityStatus() {
+    data class ConditionallyDeeplyImmutable(val conditions: Set<Int>, val reasons: List<ConditionalDeeplyImmutableReason> = listOf()) :
+        ImmutabilityStatus()
+
+    data class Mutable(val reasons: List<MutableReason> = listOf()) : ImmutabilityStatus() {
         override fun toString(): String {
             return "Mutable"
         }
     }
 }
 
-fun join(statuses: List<ImmutabilityStatus>): ImmutabilityStatus = when {
-    ImmutabilityStatus.Mutable in statuses -> ImmutabilityStatus.Mutable
-    ImmutabilityStatus.ShallowImmutable in statuses -> ImmutabilityStatus.ShallowImmutable
-    statuses.any { it is ImmutabilityStatus.ConditionallyDeeplyImmutable } -> {
-        val conditions = statuses.mapNotNull {
-            when (it) {
-                is ImmutabilityStatus.ConditionallyDeeplyImmutable -> it.conditions
-                else -> null
+fun join(statuses: List<ImmutabilityStatus>): ImmutabilityStatus {
+    return when {
+        statuses.anyInstance<ImmutabilityStatus.Mutable>() -> {
+            val reasons = statuses.filterIsInstance<ImmutabilityStatus.Mutable>().flatMap {
+                it.reasons
             }
-        }.flatten().toSet()
-        ImmutabilityStatus.ConditionallyDeeplyImmutable(conditions)
+            ImmutabilityStatus.Mutable(reasons)
+        }
+        statuses.anyInstance<ImmutabilityStatus.ShallowImmutable>() -> {
+            val reasons = statuses.filterIsInstance<ImmutabilityStatus.ShallowImmutable>().flatMap {
+                it.reasons
+            }
+            ImmutabilityStatus.ShallowImmutable(reasons)
+        }
+        statuses.any { it is ImmutabilityStatus.ConditionallyDeeplyImmutable } -> {
+            val conditions = statuses.mapNotNull {
+                when (it) {
+                    is ImmutabilityStatus.ConditionallyDeeplyImmutable -> it.conditions
+                    else -> null
+                }
+            }.flatten().toSet()
+            val reasons = statuses.filterIsInstance<ImmutabilityStatus.ConditionallyDeeplyImmutable>().flatMap {
+                it.reasons
+            }
+            ImmutabilityStatus.ConditionallyDeeplyImmutable(conditions, reasons)
+        }
+        else -> {
+            val reasons = statuses.filterIsInstance<ImmutabilityStatus.Immutable>().flatMap {
+                it.reasons
+            }
+            ImmutabilityStatus.Immutable(reasons)
+        }
     }
-    else -> ImmutabilityStatus.Immutable
 }
 
 fun join(vararg statuses: ImmutabilityStatus): ImmutabilityStatus = join(statuses.toList())
