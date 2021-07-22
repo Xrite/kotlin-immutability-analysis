@@ -129,7 +129,7 @@ fun solve(entities: List<Entity>, vararg assumptions: Assumptions): Immutability
     while (true) {
         println(iter)
         var updated = false
-        entities.forEach { entity ->
+        entities.shuffled().forEach { entity ->
             val newStatus = when (entity) {
                 is ClassTemplate -> entity.calcStatus(immutability)
                 is ObjectTemplate -> entity.calcStatus(immutability)
