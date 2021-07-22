@@ -17,7 +17,8 @@ object KotlinBasicTypes : Assumptions {
         "kotlin.String",
         "kotlin.Any",
         "kotlin.Unit",
-        "kotlin.Nothing"
+        "kotlin.Nothing",
+        "kotlin.Enum"
     )
 
     override fun get(name: String): ImmutabilityStatus? = if (name in types) {

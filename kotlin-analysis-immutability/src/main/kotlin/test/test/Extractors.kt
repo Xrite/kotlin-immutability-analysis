@@ -3,9 +3,11 @@ package test.test
 import com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
+import org.jetbrains.kotlin.idea.search.usagesSearch.descriptor
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
+import org.jetbrains.kotlin.psi.psiUtil.isPropertyParameter
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 
 interface Extractor<R> {
@@ -40,29 +42,41 @@ class BasicExtractor(private val resolutionFacade: ResolutionFacade?) : Extracto
 
 
     override fun fromClass(psiElement: KtClass): Dependencies {
-        return fromClassOrObject(psiElement)
+        //return fromClassOrObject(psiElement)
         // val context = resolutionFacade?.let { psiElement.analyzeWithContent(it) } ?: psiElement.analyzeWithContent()
-        /*
-        val type = psiElement.resolveToDescriptorIfAny(resolutionFacade)
-        val properties = psiElement.getProperties().map { ktProperty ->
-            //val ctx = ktProperty.analyzeWithContentAndGetResult(ktProperty.getResolutionFacade()).bindingContext
-            //val some = ktProperty.kotlinType(ctx)
-            ktProperty.resolveToDescriptorIfAny(resolutionFacade)?.let { desc ->
-                if (desc.isVar) {
-                    Dependency.VarTo.fromDescriptor(desc)
-                } else {
-                    Dependency.ValTo.fromDescriptor(desc)
+        return psiElement.resolveToDescriptorIfAny(resolutionFacade)?.let { type ->
+            val parameters = psiElement.primaryConstructorParameters.filter {
+                it.isPropertyParameter()
+            }.mapNotNull { parameter ->
+                parameter.descriptor?.let {
+                    if (parameter.isMutable) {
+                        Dependency.VarParameter.fromDescriptor(it)
+                    } else {
+                        Dependency.ValParameter.fromDescriptor(it)
+                    }
                 }
-            } ?: Dependency.Error("Cant resolve $ktProperty")
-        }
-        val parents = type?.typeConstructor?.supertypes?.map {
-            Dependency.Parent.fromKotlinType(it)
-        }.orEmpty()
-        val outer = type?.containingDeclaration?.let {
-            listOf(Dependency.Outer(it))
-        } ?: listOf()
-        return parents + properties + outer
-         */
+            }
+            val properties = psiElement.getProperties().map { ktProperty ->
+                //val ctx = ktProperty.analyzeWithContentAndGetResult(ktProperty.getResolutionFacade()).bindingContext
+                //val some = ktProperty.kotlinType(ctx)
+                ktProperty.resolveToDescriptorIfAny(resolutionFacade)?.let { desc ->
+                    if (desc.isVar) {
+                        Dependency.VarTo.fromDescriptor(desc)
+                    } else {
+                        Dependency.ValTo.fromDescriptor(desc)
+                    }
+                } ?: Dependency.Error("Cant resolve $ktProperty")
+            }.orEmpty()
+            val parents = type.typeConstructor.supertypes.map {
+                Dependency.Parent.fromKotlinType(it)
+            }
+            val outer = if (type.isInner) {
+                listOf(Dependency.Outer(type.containingDeclaration as ClassifierDescriptor))
+            } else {
+                listOf()
+            }
+            parameters + parents + properties + outer
+        } ?: listOf(Dependency.Error("Cannot resolve descriptor for $psiElement"))
     }
 
     override fun fromObject(psiElement: KtObjectDeclaration): Dependencies {

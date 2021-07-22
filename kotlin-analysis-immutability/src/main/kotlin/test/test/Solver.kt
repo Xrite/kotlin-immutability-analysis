@@ -50,6 +50,15 @@ fun ClassTemplate.calcStatus(
             is Dependency.VarTo -> ImmutabilityStatus.Mutable()
             is Dependency.Error -> ImmutabilityStatus.Mutable()
             is Dependency.Outer -> this.resolveParameters(immutability[it.outer])
+            is Dependency.ValParameter -> {
+                when (val status = this.resolveParameters(immutability[it.type])) {
+                    is ImmutabilityStatus.ConditionallyDeeplyImmutable -> status
+                    is ImmutabilityStatus.Immutable -> status
+                    is ImmutabilityStatus.Mutable -> ImmutabilityStatus.ShallowImmutable()
+                    is ImmutabilityStatus.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable()
+                }
+            }
+            is Dependency.VarParameter -> ImmutabilityStatus.Mutable()
         }
     }
     return join(neighbors)
@@ -73,6 +82,15 @@ fun ObjectTemplate.calcStatus(
             is Dependency.VarTo -> ImmutabilityStatus.Mutable()
             is Dependency.Error -> ImmutabilityStatus.Mutable()
             is Dependency.Outer -> this.resolveParameters(immutability[it.outer])
+            is Dependency.ValParameter -> {
+                when (val status = this.resolveParameters(immutability[it.type])) {
+                    is ImmutabilityStatus.ConditionallyDeeplyImmutable -> status
+                    is ImmutabilityStatus.Immutable -> status
+                    is ImmutabilityStatus.Mutable -> ImmutabilityStatus.ShallowImmutable()
+                    is ImmutabilityStatus.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable()
+                }
+            }
+            is Dependency.VarParameter -> ImmutabilityStatus.Mutable()
         }
     }
     return join(neighbors)

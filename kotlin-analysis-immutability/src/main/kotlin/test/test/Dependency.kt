@@ -2,11 +2,29 @@ package test.test
 
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
+import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 
 sealed class Dependency {
     data class DebugType(val debug: Any?) : Dependency()
+
+
+    data class ValParameter(val desc: ValueParameterDescriptor, val type: KotlinType, val debug: List<Any?> = listOf()) :
+        Dependency() {
+        companion object {
+            fun fromDescriptor(desc: ValueParameterDescriptor): Dependency =
+                Dependency.ValParameter(desc, desc.type, listOf(desc.type.arguments))
+        }
+    }
+
+    data class VarParameter(val desc: ValueParameterDescriptor, val type: KotlinType, val debug: List<Any?> = listOf()) :
+        Dependency() {
+        companion object {
+            fun fromDescriptor(desc: ValueParameterDescriptor): Dependency =
+                Dependency.VarParameter(desc, desc.type, listOf(desc.type.arguments))
+        }
+    }
 
     data class ValTo(val desc: VariableDescriptor, val type: KotlinType, val debug: List<Any?> = listOf()) :
         Dependency() {
