@@ -3,6 +3,7 @@ package test.test
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.descriptors.TypeParameterDescriptor
+import org.jetbrains.kotlin.fir.types.ProjectionKind
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.TypeProjection
@@ -59,7 +60,7 @@ class Immutability(entities: List<Entity>, vararg assumptions: Assumptions) {
 
     operator fun get(
         descriptor: ClassifierDescriptor,
-        parameters: List<TypeProjection> = listOf()
+        parameters: List<TypeProjection>
     ): Result = mapWithAssumptions(descriptor)?.let {
             when (it) {
                 is ImmutabilityStatus.ConditionallyDeeplyImmutable -> {

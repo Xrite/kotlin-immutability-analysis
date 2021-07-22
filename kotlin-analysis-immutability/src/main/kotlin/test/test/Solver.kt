@@ -2,21 +2,15 @@ package test.test
 
 import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
+import org.jetbrains.kotlin.types.model.typeConstructor
 
 fun ClassTemplate.resolveParameters(result: Immutability.Result): ImmutabilityStatus = when (result) {
     is Immutability.Result.ConditionallyDeeplyImmutable -> {
-        val conditionNames = result.conditions.mapNotNull {
-            it.type.fqName?.asString()
+        val indices = this.parameters.map { it.original.typeConstructor to it.index }.toMap()
+        val conditions = result.conditions.mapNotNull {
+            indices[it.type.constructor]
         }.toSet()
-        val indices = this.parameters.mapNotNull {
-            val name = it.fqNameSafe.asString()
-            if (name in conditionNames) {
-                it.index
-            } else {
-                null
-            }
-        }.toSet()
-        ImmutabilityStatus.ConditionallyDeeplyImmutable(indices)
+        ImmutabilityStatus.ConditionallyDeeplyImmutable(conditions)
     }
     Immutability.Result.Immutable -> ImmutabilityStatus.Immutable()
     Immutability.Result.Mutable -> ImmutabilityStatus.Mutable()
@@ -49,7 +43,7 @@ fun ClassTemplate.calcStatus(
             }
             is Dependency.VarTo -> ImmutabilityStatus.Mutable()
             is Dependency.Error -> ImmutabilityStatus.Mutable()
-            is Dependency.Outer -> this.resolveParameters(immutability[it.outer])
+            is Dependency.Outer -> this.resolveParameters(immutability[it.outer.defaultType])
             is Dependency.ValParameter -> {
                 when (val status = this.resolveParameters(immutability[it.type])) {
                     is ImmutabilityStatus.ConditionallyDeeplyImmutable -> status
@@ -81,7 +75,7 @@ fun ObjectTemplate.calcStatus(
             }
             is Dependency.VarTo -> ImmutabilityStatus.Mutable()
             is Dependency.Error -> ImmutabilityStatus.Mutable()
-            is Dependency.Outer -> this.resolveParameters(immutability[it.outer])
+            is Dependency.Outer -> this.resolveParameters(immutability[it.outer.defaultType])
             is Dependency.ValParameter -> {
                 when (val status = this.resolveParameters(immutability[it.type])) {
                     is ImmutabilityStatus.ConditionallyDeeplyImmutable -> status

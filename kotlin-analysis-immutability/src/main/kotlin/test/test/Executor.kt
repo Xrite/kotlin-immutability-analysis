@@ -8,6 +8,7 @@ import org.jetbrains.kotlin.idea.caches.project.productionSourceInfo
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
 import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
+import org.jetbrains.kotlin.ir.util.originalTypeParameter
 import org.jetbrains.kotlin.platform.jvm.JvmPlatforms
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
@@ -20,13 +21,15 @@ import java.util.*
 
 fun KtClassOrObject.resolveToDescriptorIfAny(
     resolutionFacade: ResolutionFacade?,
-    bodyResolveMode: BodyResolveMode = org.jetbrains.kotlin.resolve.lazy.BodyResolveMode.FULL): ClassDescriptor? =
+    bodyResolveMode: BodyResolveMode = org.jetbrains.kotlin.resolve.lazy.BodyResolveMode.FULL
+): ClassDescriptor? =
     if (resolutionFacade == null) resolveToDescriptorIfAny(bodyResolveMode)
     else resolveToDescriptorIfAny(resolutionFacade, bodyResolveMode)
 
 fun KtProperty.resolveToDescriptorIfAny(
     resolutionFacade: ResolutionFacade?,
-    bodyResolveMode: BodyResolveMode = org.jetbrains.kotlin.resolve.lazy.BodyResolveMode.FULL): VariableDescriptor? =
+    bodyResolveMode: BodyResolveMode = org.jetbrains.kotlin.resolve.lazy.BodyResolveMode.FULL
+): VariableDescriptor? =
     if (resolutionFacade == null) resolveToDescriptorIfAny(bodyResolveMode)
     else resolveToDescriptorIfAny(resolutionFacade, bodyResolveMode)
 
@@ -64,20 +67,16 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
 
         val classifiers = PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).map {
             val desc = it.resolveToDescriptorIfAny()
-
-            desc?.typeConstructor to desc?.typeConstructor?.parameters?.map { it.fqNameSafe.asString() }
+            desc?.typeConstructor?.parameters?.map { it.index }
+            desc?.defaultType?.arguments?.map{ it.type.fqName }
         }
 
         val extractor = BasicExtractor(rf)
         val entities = makeEntities(rf, project, extractor)
         //println(entities)
-        try {
-            val result = solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections, KotlinFunctions)
-            dataWriter.writer.println(result)
-            dataWriter.writer.println()
-        } catch (e: Exception) {
-           println(e.message)
-        }
+        val result = solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections, KotlinFunctions)
+        dataWriter.writer.println(result)
+        dataWriter.writer.println()
         println("ok")
         println(properties)
         println(classifiers)
