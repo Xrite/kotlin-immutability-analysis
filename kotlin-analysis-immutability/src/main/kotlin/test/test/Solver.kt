@@ -1,9 +1,5 @@
 package test.test
 
-import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
-import org.jetbrains.kotlin.types.model.typeConstructor
-
 fun ClassTemplate.resolveParameters(result: Immutability.Result): ImmutabilityStatus = when (result) {
     is Immutability.Result.ConditionallyDeeplyImmutable -> {
         val indices = this.parameters.map { it.original.typeConstructor to it.index }.toMap()

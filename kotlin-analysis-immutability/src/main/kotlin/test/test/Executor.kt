@@ -68,18 +68,33 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
         val classifiers = PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).map {
             val desc = it.resolveToDescriptorIfAny()
             desc?.typeConstructor?.parameters?.map { it.index }
-            desc?.defaultType?.arguments?.map{ it.type.fqName }
+            desc?.defaultType?.arguments?.map { it.type.fqName }
+            desc to desc?.isInner
         }
 
-        val extractor = BasicExtractor(rf)
+        PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).forEach {
+            val desc = it.resolveToDescriptorIfAny()
+            println(desc to null)
+        }
+
+
+
+        val extractor = MultipleExtractors(
+            PropertiesExtractor(rf),
+            ValueParametersExtractor(rf),
+            ParentsExtractor(rf),
+            OuterClassExtractor(rf)
+        )
         val entities = makeEntities(rf, project, extractor)
         //println(entities)
         val result = solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections, KotlinFunctions)
-        dataWriter.writer.println(result)
-        dataWriter.writer.println()
         println("ok")
         println(properties)
         println(classifiers)
+        val stats = Statistics(result)
+        println(stats.percentage())
+        dataWriter.writer.println(stats.writeCSV())
+        dataWriter.writer.println()
         //pp(entities)
         //dependenciesDataWriter.writer.println(entities)
         //dataWriter.writer.println("entities")
