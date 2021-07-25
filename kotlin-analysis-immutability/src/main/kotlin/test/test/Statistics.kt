@@ -34,7 +34,7 @@ class Statistics(private val immutability: Immutability) {
                 is ObjectTemplate -> entity.objectType.name
                 ErrorTemplate -> "ERROR"
             }
-            name + ", " + type + ", " + result
+            "$name, $type, $result"
         }
     }
 }

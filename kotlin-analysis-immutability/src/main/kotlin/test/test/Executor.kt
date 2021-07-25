@@ -39,6 +39,7 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
 
     override fun analyse(project: Project) {
 
+        /*
         val kcs = KotlinCacheService.getInstance(project)
 
         val modules = com.intellij.openapi.module.ModuleManager.getInstance(project).modules
@@ -58,6 +59,9 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
 
             kcs.getResolutionFacade(files, JvmPlatforms.jvm18)
         }
+        */
+
+        val rf = null
         val properties = PsiProvider.extractElementsOfTypeFromProject(project, KtProperty::class.java).map {
             val desc = it.resolveToDescriptorIfAny()
             desc?.name to desc?.type?.arguments?.map {
@@ -72,11 +76,15 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
             desc to desc?.isInner
         }
 
+        val objects = PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).forEach() {
+            val desc = it.resolveToDescriptorIfAny()
+            println(desc to desc?.typeConstructor?.parameters)
+        }
+
         PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).forEach {
             val desc = it.resolveToDescriptorIfAny()
             println(desc to null)
         }
-
 
 
         val extractor = MultipleExtractors(

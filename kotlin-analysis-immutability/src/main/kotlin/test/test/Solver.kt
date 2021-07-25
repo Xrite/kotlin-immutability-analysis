@@ -2,7 +2,7 @@ package test.test
 
 fun ClassTemplate.resolveParameters(result: Immutability.Result): ImmutabilityStatus = when (result) {
     is Immutability.Result.ConditionallyDeeplyImmutable -> {
-        val indices = this.parameters.map { it.original.typeConstructor to it.index }.toMap()
+        val indices = this.parameters.associate { it.original.typeConstructor to it.index }
         val conditions = result.conditions.mapNotNull {
             indices[it.type.constructor]
         }.toSet()
@@ -85,33 +85,6 @@ fun ObjectTemplate.calcStatus(
     }
     return join(neighbors)
 }
-
-/*
-fun ParameterizedClassTemplate.calcStatus(
-    statuses: Map<Entity, ImmutabilityStatus>,
-    index: Map<DeclarationDescriptor, Entity>,
-    immutability: Immutability
-): ImmutabilityStatus {
-    val neighbors = this.dependencies.map {
-        when (it) {
-            is Dependency.DebugType -> ImmutabilityStatus.Immutable
-            is Dependency.Parent -> immutability[it.type]
-            is Dependency.ValTo -> {
-                when(val status = immutability[it.type]) {
-                    is ImmutabilityStatus.ConditionallyDeeplyImmutable -> status
-                    ImmutabilityStatus.Immutable -> status
-                    ImmutabilityStatus.Mutable -> ImmutabilityStatus.ShallowImmutable
-                    ImmutabilityStatus.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable
-                }
-            }
-            is Dependency.VarTo -> ImmutabilityStatus.Mutable
-            is Dependency.Error -> ImmutabilityStatus.Mutable
-            is Dependency.Outer -> TODO()
-        }
-    }
-    return join(neighbors)
-}
- */
 
 fun solve(entities: List<Entity>, vararg assumptions: Assumptions): Immutability {
     val immutability = Immutability(entities, *assumptions)
