@@ -235,7 +235,7 @@ class MultipleExtractors(vararg extractors: Extractor<Dependencies>) : Extractor
     }
 }
 
-class Packer(val resolutionFacade: ResolutionFacade?) {
+class Packer(private val resolutionFacade: ResolutionFacade?) {
     fun packClass(ktClass: KtClass, deps: Dependencies): Entity {
         val descriptor = ktClass.resolveToDescriptorIfAny(resolutionFacade)
         return descriptor?.let {
@@ -254,11 +254,11 @@ class Packer(val resolutionFacade: ResolutionFacade?) {
         val descriptor = ktObjectDeclaration.resolveToDescriptorIfAny(resolutionFacade)
         return descriptor?.let {
             val type = when {
-                ktObjectDeclaration.isCompanion() -> ObjectType.COMPANION_OBJECT
-                ktObjectDeclaration.isObjectLiteral() -> ObjectType.ANONYMOUS_OBJECT
-                else -> ObjectType.OBJECT
+                ktObjectDeclaration.isCompanion() -> ClassType.COMPANION_OBJECT
+                ktObjectDeclaration.isObjectLiteral() -> ClassType.ANONYMOUS_OBJECT
+                else -> ClassType.OBJECT
             }
-            ObjectTemplate(it, type, deps)
+            ClassTemplate(it, type, deps)
         } ?: ErrorTemplate
     }
 }

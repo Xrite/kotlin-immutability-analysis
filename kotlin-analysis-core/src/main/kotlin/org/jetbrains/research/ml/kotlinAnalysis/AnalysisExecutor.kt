@@ -46,26 +46,10 @@ abstract class AnalysisExecutor {
         controlledResourceManagers.forEach { it.close() }
     }
 
-    private fun setUpProject(projectPath: String): Project {
-        val project: Project = ProjectUtil.openOrImport(Paths.get(projectPath))
-
-        if (MavenProjectsManager.getInstance(project).isMavenizedProject) {
-            MavenProjectsManager.getInstance(project).scheduleImportAndResolve()
-            MavenProjectsManager.getInstance(project).importProjects()
-        } else {
-            ExternalSystemUtil.refreshProject(
-                projectPath,
-                ImportSpecBuilder(project, GradleConstants.SYSTEM_ID)
-            )
-        }
-
-        return project
-    }
-
     /** Execute analysis for all projects in [given directory][projectsDir]. */
     fun execute(
         projectsDir: Path,
-        setupProject: (Path) -> Project = { projectPath -> setUpProject(projectPath.toString()) }
+        setupProject: (Path) -> Project = { projectPath -> ProjectUtil.openOrImport(projectPath, null, true) }
     ) {
         init()
         try {

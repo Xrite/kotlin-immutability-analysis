@@ -19,22 +19,25 @@ class Statistics(private val immutability: Immutability) {
         """.trimIndent()
     }
 
-    fun writeCSV(): String {
+    fun writeCSV(projectName: String): String {
         val results = immutability.results()
-        return results.joinToString(separator = "\n") {
+        return results.joinToString(separator = System.lineSeparator()) {
             val entity = it.first
-            val result = it.second
+            val result = when(it.second) {
+                is ImmutabilityStatus.ConditionallyDeeplyImmutable -> "ConditionallyDeeplyImmutable"
+                is ImmutabilityStatus.Immutable -> "Immutable"
+                is ImmutabilityStatus.Mutable -> "Mutable"
+                is ImmutabilityStatus.ShallowImmutable -> "ShallowImmutable"
+            }
             val name = when (entity) {
                 is ClassTemplate -> entity.desc.fqNameSafe.asString()
-                is ObjectTemplate -> entity.desc.fqNameSafe.asString()
                 ErrorTemplate -> "ERROR"
             }
             val type = when (entity) {
                 is ClassTemplate -> entity.classType.name
-                is ObjectTemplate -> entity.objectType.name
                 ErrorTemplate -> "ERROR"
             }
-            "$name, $type, $result"
+            "$projectName, $name, $type, $result"
         }
     }
 }

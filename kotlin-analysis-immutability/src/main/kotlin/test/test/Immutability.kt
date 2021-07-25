@@ -52,7 +52,6 @@ class Immutability(private val entities: List<Entity>, vararg assumptions: Assum
     private val map: MutableMap<DeclarationDescriptor, ImmutabilityStatus> = entities.mapNotNull {
         when (it) {
             is ClassTemplate -> it.desc
-            is ObjectTemplate -> it.desc
             ErrorTemplate -> null
         }
     }.associateWith { ImmutabilityStatus.Immutable() }.toMutableMap()
@@ -142,7 +141,6 @@ class Immutability(private val entities: List<Entity>, vararg assumptions: Assum
         when (entity) {
             is ClassTemplate -> update(entity.desc, newValue)
             ErrorTemplate -> false
-            is ObjectTemplate -> update(entity.desc, newValue)
         }
 
     fun update(descriptor: DeclarationDescriptor, newValue: ImmutabilityStatus): Boolean {
@@ -159,11 +157,10 @@ class Immutability(private val entities: List<Entity>, vararg assumptions: Assum
         }.joinToString(separator = "\n")
     }
 
-    fun results() =
+    fun results(): List<Pair<Entity, ImmutabilityStatus>> =
         entities.mapNotNull { entity ->
             when (entity) {
                 is ClassTemplate -> map[entity.desc]?.let { entity to it }
-                is ObjectTemplate -> map[entity.desc]?.let { entity to it }
                 ErrorTemplate -> null
             }
         }

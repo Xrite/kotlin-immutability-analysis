@@ -13,6 +13,7 @@ fun ClassTemplate.resolveParameters(result: Immutability.Result): ImmutabilitySt
     Immutability.Result.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable()
 }
 
+/*
 fun ObjectTemplate.resolveParameters(result: Immutability.Result): ImmutabilityStatus = when (result) {
     is Immutability.Result.ConditionallyDeeplyImmutable -> {
         throw Exception("Object $this depends on type arguments ${result.conditions}")
@@ -21,6 +22,7 @@ fun ObjectTemplate.resolveParameters(result: Immutability.Result): ImmutabilityS
     Immutability.Result.Mutable -> ImmutabilityStatus.Mutable()
     Immutability.Result.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable()
 }
+ */
 
 fun ClassTemplate.calcStatus(
     immutability: Immutability
@@ -54,6 +56,7 @@ fun ClassTemplate.calcStatus(
     return join(neighbors)
 }
 
+/*
 fun ObjectTemplate.calcStatus(
     immutability: Immutability
 ): ImmutabilityStatus {
@@ -85,6 +88,7 @@ fun ObjectTemplate.calcStatus(
     }
     return join(neighbors)
 }
+ */
 
 fun solve(entities: List<Entity>, vararg assumptions: Assumptions): Immutability {
     val immutability = Immutability(entities, *assumptions)
@@ -95,7 +99,6 @@ fun solve(entities: List<Entity>, vararg assumptions: Assumptions): Immutability
         entities.shuffled().forEach { entity ->
             val newStatus = when (entity) {
                 is ClassTemplate -> entity.calcStatus(immutability)
-                is ObjectTemplate -> entity.calcStatus(immutability)
                 ErrorTemplate -> ImmutabilityStatus.Mutable()
             }
             if (immutability.update(entity, newStatus)) {

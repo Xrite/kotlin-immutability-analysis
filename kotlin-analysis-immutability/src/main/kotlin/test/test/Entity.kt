@@ -20,6 +20,7 @@ data class ClassTemplate(
 
 }
 
+/*
 data class ObjectTemplate(val desc: DeclarationDescriptor, val objectType: ObjectType, val dependencies: Dependencies) : Entity() {
     /*
     override fun toString(): String {
@@ -29,6 +30,7 @@ data class ObjectTemplate(val desc: DeclarationDescriptor, val objectType: Objec
      */
 
 }
+ */
 
 object ErrorTemplate : Entity()
 
@@ -37,11 +39,11 @@ enum class ClassType {
     CLASS,
     SEALED_CLASS,
     DATA_CLASS,
-    ENUM_CLASS
-}
-
-enum class ObjectType {
+    ENUM_CLASS,
     OBJECT,
     COMPANION_OBJECT,
     ANONYMOUS_OBJECT
+}
+
+enum class ObjectType {
 }
