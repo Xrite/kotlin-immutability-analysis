@@ -7,6 +7,8 @@ import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
+import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
+import org.jetbrains.kotlin.psi.psiUtil.isObjectLiteral
 import org.jetbrains.kotlin.psi.psiUtil.isPropertyParameter
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 
@@ -77,12 +79,15 @@ class ParentsExtractor(private val resolutionFacade: ResolutionFacade?) : ClassO
 class OuterClassesExtractor(private val resolutionFacade: ResolutionFacade?) : ClassOrObjectExtractor<Dependencies>() {
     override fun fromClassOrObject(psiElement: KtClassOrObject): Dependencies =
         psiElement.resolveToDescriptorIfAny(resolutionFacade)?.let { descriptor ->
-            val outer = if (descriptor.isInner) {
-                listOf(Dependency.Outer(descriptor.containingDeclaration as ClassifierDescriptor))
-            } else {
-                listOf()
+            when {
+                descriptor.isInner -> listOf(Dependency.Outer(descriptor.containingDeclaration as ClassifierDescriptor))
+                psiElement.isObjectLiteral() -> psiElement.containingClassOrObject?.let {
+                    it.resolveToDescriptorIfAny(resolutionFacade)?.let {
+                        listOf(Dependency.Outer(it))
+                    } ?: resolveErrorFor(it)
+                } ?: listOf()
+                else -> listOf()
             }
-            outer
         } ?: resolveErrorFor(psiElement)
 }
 
