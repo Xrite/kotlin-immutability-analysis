@@ -5,16 +5,21 @@ import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
+import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.KtProperty
+import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
+import org.jetbrains.kotlin.resolve.isInlineClass
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import org.jetbrains.research.ml.kotlinAnalysis.AnalysisExecutor
 import org.jetbrains.research.ml.kotlinAnalysis.PrintWriterResourceManager
 import org.jetbrains.research.ml.kotlinAnalysis.ResourceManager
+import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 import java.nio.file.Path
 
 class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
-    private val dataWriter = PrintWriterResourceManager(outputDir, "results.csv")
+    private val dataWriter = CSVWriterResourceManager(outputDir, "results.csv")
     override val controlledResourceManagers: Set<ResourceManager> = setOf(dataWriter)
 
     override fun analyse(project: Project) {
@@ -43,19 +48,17 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
         */
 
         val rf: ResolutionFacade? = null
-//        val properties = PsiProvider.extractElementsOfTypeFromProject(project, KtProperty::class.java).forEach {
-//            val desc = it.resolveToDescriptorIfAny()
-//            //println(desc)
-//        }
-
         /*
-        val classifiers = PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).map {
+        val properties = PsiProvider.extractElementsOfTypeFromProject(project, KtProperty::class.java).forEach {
             val desc = it.resolveToDescriptorIfAny()
-            desc?.typeConstructor?.parameters?.map { it.index }
-            desc?.defaultType?.arguments?.map { it.type.fqName }
-            desc to desc?.isInner
+            println(desc to desc?.i)
         }
          */
+
+        PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).forEach {
+            val desc = it.resolveToDescriptorIfAny()
+            println(desc to it.containingClassOrObject)
+        }
 
         /*
         val objects = PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).forEach() {
@@ -64,12 +67,10 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
         }
          */
 
-        /*
         PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).forEach {
             val desc = it.resolveToDescriptorIfAny()
-            println(desc to null)
+            println(desc to it.containingClassOrObject)
         }
-         */
 
 
         val extractor = MultipleExtractors(
@@ -86,7 +87,7 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
         //println(classifiers)
         val stats = Statistics(result)
         println(stats.percentage())
-        dataWriter.writer.println(stats.writeCSV(project.name))
+        dataWriter.addResult(project.name, result)
         //pp(entities)
         //dependenciesDataWriter.writer.println(entities)
         //dataWriter.writer.println("entities")
