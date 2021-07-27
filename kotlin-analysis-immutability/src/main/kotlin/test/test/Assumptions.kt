@@ -46,14 +46,17 @@ object KotlinCollections : Assumptions {
 }
 
 object KotlinFunctions : Assumptions {
-    override fun get(name: String): ImmutabilityStatus? = if ("kotlin.Function(0|[1-9][0-9]*)".toRegex().matches(name)) {
-        ImmutabilityStatus.Immutable()
-    } else {
-        null
-    }
+    override fun get(name: String): ImmutabilityStatus? =
+        if ("kotlin.Function(0|[1-9][0-9]*)".toRegex().matches(name)) {
+            ImmutabilityStatus.Immutable()
+        } else {
+            null
+        }
 }
 
 object JavaAssumedImmutableTypes : Assumptions {
+    // TODO: drop stuff which is NOT immutable in Java
+    //       (like `java.util.Map`)
     val types = setOf(
         "java.io.File",
         "java.io.Serializable",

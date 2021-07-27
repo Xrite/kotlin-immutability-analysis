@@ -10,27 +10,7 @@ data class ClassTemplate(
     val classType: ClassType,
     val dependencies: Dependencies,
     val parameters: List<TypeParameterDescriptor> = listOf()
-) : Entity() {
-    /*
-    override fun toString(): String {
-        return desc.toString() + "\n" +
-                dependencies.joinToString(separator = "\n", prefix = "[", postfix = "]") { it.toString() }
-    }
-     */
-
-}
-
-/*
-data class ObjectTemplate(val desc: DeclarationDescriptor, val objectType: ObjectType, val dependencies: Dependencies) : Entity() {
-    /*
-    override fun toString(): String {
-        return desc.toString() + "\n" +
-                dependencies.joinToString(separator = "\n", prefix = "[", postfix = "]") { it.toString() }
-    }
-     */
-
-}
- */
+) : Entity()
 
 object ErrorTemplate : Entity()
 
@@ -43,7 +23,4 @@ enum class ClassType {
     OBJECT,
     COMPANION_OBJECT,
     ANONYMOUS_OBJECT
-}
-
-enum class ObjectType {
 }

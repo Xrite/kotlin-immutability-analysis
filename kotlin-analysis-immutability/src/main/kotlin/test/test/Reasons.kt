@@ -8,7 +8,7 @@ sealed class Reason {
     data class Type(val type: ReasonType, val message: String) : Reason()
 }
 
-enum class ReasonType() {
+enum class ReasonType {
     PARENT_TYPE_MUTABLE_ASSUMPTION,
     PARENT_TYPE_MUTABLE,
     VAR_FIELD,

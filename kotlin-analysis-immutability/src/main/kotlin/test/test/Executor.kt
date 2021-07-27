@@ -11,22 +11,7 @@ import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import org.jetbrains.research.ml.kotlinAnalysis.AnalysisExecutor
 import org.jetbrains.research.ml.kotlinAnalysis.PrintWriterResourceManager
 import org.jetbrains.research.ml.kotlinAnalysis.ResourceManager
-import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 import java.nio.file.Path
-
-fun KtClassOrObject.resolveToDescriptorIfAny(
-    resolutionFacade: ResolutionFacade?,
-    bodyResolveMode: BodyResolveMode = org.jetbrains.kotlin.resolve.lazy.BodyResolveMode.FULL
-): ClassDescriptor? =
-    if (resolutionFacade == null) resolveToDescriptorIfAny(bodyResolveMode)
-    else resolveToDescriptorIfAny(resolutionFacade, bodyResolveMode)
-
-fun KtProperty.resolveToDescriptorIfAny(
-    resolutionFacade: ResolutionFacade?,
-    bodyResolveMode: BodyResolveMode = org.jetbrains.kotlin.resolve.lazy.BodyResolveMode.FULL
-): VariableDescriptor? =
-    if (resolutionFacade == null) resolveToDescriptorIfAny(bodyResolveMode)
-    else resolveToDescriptorIfAny(resolutionFacade, bodyResolveMode)
 
 class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
     private val dataWriter = PrintWriterResourceManager(outputDir, "results.csv")
@@ -57,11 +42,11 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
         }
         */
 
-        val rf = null
-        val properties = PsiProvider.extractElementsOfTypeFromProject(project, KtProperty::class.java).forEach {
-            val desc = it.resolveToDescriptorIfAny()
-            //println(desc)
-        }
+        val rf: ResolutionFacade? = null
+//        val properties = PsiProvider.extractElementsOfTypeFromProject(project, KtProperty::class.java).forEach {
+//            val desc = it.resolveToDescriptorIfAny()
+//            //println(desc)
+//        }
 
         /*
         val classifiers = PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).map {
@@ -91,7 +76,7 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
             PropertiesExtractor(rf),
             ValueParametersExtractor(rf),
             ParentsExtractor(rf),
-            OuterClassExtractor(rf)
+            OuterClassesExtractor(rf)
         )
         val entities = makeEntities(rf, project, extractor)
         //println(entities)

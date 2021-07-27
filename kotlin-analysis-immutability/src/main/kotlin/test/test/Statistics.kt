@@ -3,6 +3,7 @@ package test.test
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 
 class Statistics(private val immutability: Immutability) {
+    // TODO: Add error percentage to the results
     fun percentage(): String {
         val results = immutability.results()
         val immutable = results.filter { it.second is ImmutabilityStatus.Immutable }
@@ -19,6 +20,7 @@ class Statistics(private val immutability: Immutability) {
         """.trimIndent()
     }
 
+    // TODO: consider using better libs for CSV writing
     fun writeCSV(projectName: String): String {
         val results = immutability.results()
         return results.joinToString(separator = System.lineSeparator()) {

@@ -2,8 +2,6 @@ package test.test
 
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
-import org.jetbrains.kotlin.descriptors.TypeParameterDescriptor
-import org.jetbrains.kotlin.fir.types.ProjectionKind
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.TypeProjection
@@ -11,7 +9,7 @@ import org.jetbrains.kotlin.types.Variance
 import org.jetbrains.kotlin.types.typeUtil.asTypeProjection
 import org.jetbrains.kotlin.types.typeUtil.isTypeParameter
 
-class Immutability(private val entities: List<Entity>, vararg assumptions: Assumptions) {
+class Immutability(private val entities: List<Entity>, private vararg val assumptions: Assumptions) {
     sealed class Result {
         object Immutable : Result() {
             override fun toString(): String {
@@ -34,16 +32,15 @@ class Immutability(private val entities: List<Entity>, vararg assumptions: Assum
         }
     }
 
+    // TODO: maybe use Set here to speed things up???
     fun join(results: List<Result>): Result = when {
         Result.Mutable in results -> Result.Mutable
         Result.ShallowImmutable in results -> Result.ShallowImmutable
         results.any { it is Result.ConditionallyDeeplyImmutable } -> {
-            val conditions = results.mapNotNull {
-                when (it) {
-                    is Result.ConditionallyDeeplyImmutable -> it.conditions
-                    else -> null
-                }
-            }.flatten().toSet()
+            val conditions = results
+                .filterIsInstance<Result.ConditionallyDeeplyImmutable>()
+                .flatMap { it.conditions }
+                .toSet()
             Result.ConditionallyDeeplyImmutable(conditions)
         }
         else -> Result.Immutable
@@ -55,7 +52,6 @@ class Immutability(private val entities: List<Entity>, vararg assumptions: Assum
             ErrorTemplate -> null
         }
     }.associateWith { ImmutabilityStatus.Immutable() }.toMutableMap()
-    private val assumptions = assumptions.toList()
 
     operator fun get(
         descriptor: ClassifierDescriptor,
@@ -88,43 +84,16 @@ class Immutability(private val entities: List<Entity>, vararg assumptions: Assum
         }
     } ?: Result.Mutable
 
-    /*
     operator fun get(
-        descriptor: ClassifierDescriptor,
-        parameters: List<TypeProjection> = listOf()
-    ): ImmutabilityStatus = when(val status = getStatus(descriptor, parameters)) {
-            is Immutability.Result.ConditionallyDeeplyImmutable ->ImmutabilityStatus.ConditionallyDeeplyImmutable(status.conditions.map {
-                (it.type.constructor.declarationDescriptor as TypeParameterDescriptor).index
-            }.toSet())
-            Result.Immutable -> ImmutabilityStatus.Immutable
-            Result.Mutable -> ImmutabilityStatus.Mutable
-            Result.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable
+        type: KotlinType
+    ): Result =
+        if (type.isTypeParameter()) {
+            Result.ConditionallyDeeplyImmutable(setOf(type.asTypeProjection()))
+        } else {
+            null
         }
-     */
-
-
-    operator fun get(
-        type: KotlinType
-    ): Result = if (type.isTypeParameter()) {
-        Result.ConditionallyDeeplyImmutable(setOf(type.asTypeProjection()))
-    } else {
-        null
-    }
-        ?: type.constructor.declarationDescriptor?.let { get(it, type.arguments) }
-        ?: Result.Mutable
-
-    /*
-    operator fun get(
-        type: KotlinType
-    ): ImmutabilityStatus = when(val status = getStatus(type)) {
-        is Immutability.Result.ConditionallyDeeplyImmutable ->ImmutabilityStatus.ConditionallyDeeplyImmutable(status.conditions.map {
-            (it.type.constructor.declarationDescriptor as TypeParameterDescriptor).index
-        }.toSet())
-        Result.Immutable -> ImmutabilityStatus.Immutable
-        Result.Mutable -> ImmutabilityStatus.Mutable
-        Result.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable
-    }
-     */
+            ?: type.constructor.declarationDescriptor?.let { get(it, type.arguments) }
+            ?: Result.Mutable
 
     private fun checkAssumptions(name: String): ImmutabilityStatus? {
         val t = assumptions.mapNotNull { it.get(name) }
@@ -151,11 +120,9 @@ class Immutability(private val entities: List<Entity>, vararg assumptions: Assum
         return true
     }
 
-    override fun toString(): String {
-        return map.map {
-            it.key.fqNameSafe.asString() + " -> " + it.value.toString()
-        }.joinToString(separator = "\n")
-    }
+    override fun toString(): String = map.map {
+        it.key.fqNameSafe.asString() + " -> " + it.value.toString()
+    }.joinToString(separator = "\n")
 
     fun results(): List<Pair<Entity, ImmutabilityStatus>> =
         entities.mapNotNull { entity ->
