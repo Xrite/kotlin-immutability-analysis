@@ -1,6 +1,14 @@
 package test.test
 
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.vfs.VfsUtilCore
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
+import com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
 import org.jetbrains.kotlin.psi.KtClass
@@ -11,6 +19,7 @@ import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.kotlin.psi.psiUtil.isObjectLiteral
 import org.jetbrains.kotlin.psi.psiUtil.isPropertyParameter
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
+import org.jetbrains.research.ml.kotlinAnalysis.util.isKotlinRelatedFile
 
 interface Extractor<R> {
     fun fromClass(psiElement: KtClass): R
@@ -127,16 +136,45 @@ class Packer(private val resolutionFacade: ResolutionFacade?) {
     }
 }
 
+fun extractPsiFilesWithoutTests(project: Project): Set<PsiFile> {
+    val projectPsiFiles = mutableSetOf<PsiFile>()
+    //val projectRootManager = ProjectRootManager.getInstance(project)
+    val psiManager = PsiManager.getInstance(project)
+    ModuleManager.getInstance(project).modules.forEach {
+        println("module: $it")
+        ModuleRootManager.getInstance(it).getSourceRoots(false).forEach {
+            //println(it)
+            VfsUtilCore.iterateChildrenRecursively(it, null) { virtualFile ->
+                if (!virtualFile.isKotlinRelatedFile() || virtualFile.canonicalPath == null) {
+                    return@iterateChildrenRecursively true
+                }
+                val psi = psiManager.findFile(virtualFile) ?: return@iterateChildrenRecursively true
+                projectPsiFiles.add(psi)
+            }
+        }
+    }
+    return projectPsiFiles
+}
+
+fun <T : PsiElement> extractElementsOfTypeFromProject(
+    project: Project,
+    psiElementClass: Class<T>
+): List<T> {
+    return extractPsiFilesWithoutTests(project)
+        .map { PsiTreeUtil.collectElementsOfType(it, psiElementClass) }
+        .flatten()
+}
+
 fun makeEntities(
     resolutionFacade: ResolutionFacade?,
     project: Project,
     extractor: Extractor<Dependencies>
 ): List<Entity> {
     val packer = Packer(resolutionFacade)
-    val classes = PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).map {
+    val classes = extractElementsOfTypeFromProject(project, KtClass::class.java).map {
         packer.packClass(it, extractor.fromClass(it))
     }
-    val objects = PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).map {
+    val objects = extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).map {
         packer.packObject(it, extractor.fromObject(it))
     }
     return classes + objects
