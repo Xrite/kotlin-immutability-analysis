@@ -12,12 +12,14 @@ class Statistics(private val immutability: Immutability) {
         val mutable = results.filter { it.second is ImmutabilityStatus.Mutable }
         val conditionalDeeplyImmutable = results.filter { it.second is ImmutabilityStatus.ConditionallyDeeplyImmutable }
         val total = results.size
+        val unresolved = immutability.unresolvedEntities()
         return """
             Immutable: ${immutable.size} (${immutable.size / total.toDouble() * 100}%)
             ShallowImmutable: ${shallowImmutable.size} (${shallowImmutable.size / total.toDouble() * 100}%)
             ConditionalDeeplyImmutable: ${conditionalDeeplyImmutable.size} (${conditionalDeeplyImmutable.size / total.toDouble() * 100}%)
             Mutable: ${mutable.size} (${mutable.size / total.toDouble() * 100}%)
             Total: $total
+            Unresolved: ${unresolved.size}
         """.trimIndent()
     }
 }

@@ -131,4 +131,18 @@ class Immutability(private val entities: List<Entity>, private vararg val assump
                 ErrorTemplate -> null
             }
         }
+
+    fun resultsForEntities(): List<Pair<Entity, ImmutabilityStatus?>> =
+        entities.map { entity ->
+            when (entity) {
+                is ClassTemplate -> entity to map[entity.desc]
+                ErrorTemplate -> entity to null
+            }
+        }
+
+    fun unresolvedEntities(): List<Entity> =
+        entities.filter { when(it) {
+            is ClassTemplate -> map[it.desc] == null
+            ErrorTemplate -> true
+        } }
 }
