@@ -3,21 +3,16 @@ package test.test
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.util.PsiTreeUtil
-import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
-import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
-import org.jetbrains.kotlin.psi.psiUtil.isObjectLiteral
-import org.jetbrains.kotlin.psi.psiUtil.isPropertyParameter
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 import org.jetbrains.research.ml.kotlinAnalysis.util.isKotlinRelatedFile
 
@@ -36,69 +31,6 @@ abstract class ClassOrObjectExtractor<R> : Extractor<R> {
 
 fun resolveErrorFor(psiElement: KtElement) =
     listOf(Dependency.Error("Cannot resolve descriptor for $psiElement"))
-
-class PropertiesExtractor(private val resolutionFacade: ResolutionFacade?) : ClassOrObjectExtractor<Dependencies>() {
-    override fun fromClassOrObject(psiElement: KtClassOrObject): Dependencies =
-        psiElement.resolveToDescriptorIfAny(resolutionFacade)?.let { classifierDesc ->
-            val properties = psiElement.body?.properties?.map { prop ->
-                prop.resolveToDescriptorIfAny(resolutionFacade)?.let { desc ->
-                    if (desc.isVar) {
-                        Dependency.VarTo.fromDescriptor(desc)
-                    } else {
-                        Dependency.ValTo.fromDescriptor(desc)
-                    }
-                } ?: Dependency.Error("Cannot resolve $prop")
-            }.orEmpty()
-            properties
-        } ?: resolveErrorFor(psiElement)
-}
-
-class ValueParametersExtractor(private val resolutionFacade: ResolutionFacade?) : Extractor<Dependencies> {
-    override fun fromClass(psiElement: KtClass): Dependencies =
-        psiElement.resolveToDescriptorIfAny(resolutionFacade)?.let { type ->
-            // TODO: check that primaryConstructorParameters returns
-            //       empty list for non-existing primary ctor
-            val parameters = psiElement.primaryConstructorParameters.filter {
-                it.isPropertyParameter()
-            }.map { parameter ->
-                parameter.resolveToDescriptorIfAny(resolutionFacade)?.let {
-                    if (parameter.isMutable) {
-                        Dependency.VarParameter.fromDescriptor(it)
-                    } else {
-                        Dependency.ValParameter.fromDescriptor(it)
-                    }
-                } ?: Dependency.Error("Cannot resolve $parameter")
-            }
-            parameters
-        } ?: resolveErrorFor(psiElement)
-
-    override fun fromObject(psiElement: KtObjectDeclaration): Dependencies = listOf()
-}
-
-class ParentsExtractor(private val resolutionFacade: ResolutionFacade?) : ClassOrObjectExtractor<Dependencies>() {
-    override fun fromClassOrObject(psiElement: KtClassOrObject): Dependencies =
-        psiElement.resolveToDescriptorIfAny(resolutionFacade)?.let { descriptor ->
-            val parents = descriptor.typeConstructor.supertypes.map {
-                Dependency.Parent.fromKotlinType(it)
-            }
-            parents
-        } ?: resolveErrorFor(psiElement)
-}
-
-class OuterClassesExtractor(private val resolutionFacade: ResolutionFacade?) : ClassOrObjectExtractor<Dependencies>() {
-    override fun fromClassOrObject(psiElement: KtClassOrObject): Dependencies =
-        psiElement.resolveToDescriptorIfAny(resolutionFacade)?.let { descriptor ->
-            when {
-                descriptor.isInner -> listOf(Dependency.Outer(descriptor.containingDeclaration as ClassifierDescriptor))
-                psiElement.isObjectLiteral() -> psiElement.containingClassOrObject?.let {
-                    it.resolveToDescriptorIfAny(resolutionFacade)?.let {
-                        listOf(Dependency.Outer(it))
-                    } ?: resolveErrorFor(it)
-                } ?: listOf()
-                else -> listOf()
-            }
-        } ?: resolveErrorFor(psiElement)
-}
 
 class MultipleExtractors(private vararg val extractors: Extractor<Dependencies>) : Extractor<Dependencies> {
     override fun fromClass(psiElement: KtClass): Dependencies =
@@ -171,10 +103,10 @@ fun makeEntities(
     extractor: Extractor<Dependencies>
 ): List<Entity> {
     val packer = Packer(resolutionFacade)
-    val classes = extractElementsOfTypeFromProject(project, KtClass::class.java).map {
+    val classes = PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).map {
         packer.packClass(it, extractor.fromClass(it))
     }
-    val objects = extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).map {
+    val objects = PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).map {
         packer.packObject(it, extractor.fromObject(it))
     }
     return classes + objects

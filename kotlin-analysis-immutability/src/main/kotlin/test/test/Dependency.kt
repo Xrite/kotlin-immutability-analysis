@@ -3,6 +3,7 @@ package test.test
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
+import org.jetbrains.kotlin.psi.KtPropertyDelegate
 import org.jetbrains.kotlin.types.KotlinType
 
 sealed class Dependency {
@@ -32,8 +33,7 @@ sealed class Dependency {
         }
     }
 
-    // TODO: rename to a better name (ValProperty?)
-    data class ValTo(
+    data class ValProperty(
         val desc: VariableDescriptor,
         val type: KotlinType,
         val debug: List<Any?> = listOf()
@@ -41,12 +41,11 @@ sealed class Dependency {
         Dependency() {
         companion object {
             fun fromDescriptor(desc: VariableDescriptor): Dependency =
-                ValTo(desc, desc.type, listOf(desc.type.arguments))
+                ValProperty(desc, desc.type, listOf(desc.type.arguments))
         }
     }
 
-    // TODO: rename to a better name (VarProperty?)
-    data class VarTo(
+    data class VarProperty(
         val desc: VariableDescriptor,
         val type: KotlinType,
         val debug: List<Any?> = listOf()
@@ -54,7 +53,32 @@ sealed class Dependency {
         Dependency() {
         companion object {
             fun fromDescriptor(desc: VariableDescriptor): Dependency =
-                VarTo(desc, desc.type, listOf(desc.type.arguments))
+                VarProperty(desc, desc.type, listOf(desc.type.arguments))
+        }
+    }
+
+    data class PropertyWithGetter(
+        val desc: VariableDescriptor,
+        val type: KotlinType,
+        val debug: List<Any?> = listOf()
+    ) :
+        Dependency() {
+        companion object {
+            fun fromDescriptor(desc: VariableDescriptor): Dependency =
+                PropertyWithGetter(desc, desc.type)
+        }
+    }
+
+    data class DelegatedValProperty(
+        val desc: VariableDescriptor,
+        val type: KotlinType,
+        val delegate: KtPropertyDelegate,
+        val debug: List<Any?> = listOf()
+    ) :
+        Dependency() {
+        companion object {
+            fun fromDescriptor(desc: VariableDescriptor, delegate: KtPropertyDelegate): Dependency =
+                DelegatedValProperty(desc, desc.type, delegate)
         }
     }
 

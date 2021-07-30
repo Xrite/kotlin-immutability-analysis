@@ -20,7 +20,7 @@ fun ClassTemplate.calcStatus(
         when (it) {
             is Dependency.DebugType -> ImmutabilityStatus.Immutable()
             is Dependency.Parent -> this.resolveParameters(immutability[it.type])
-            is Dependency.ValTo -> {
+            is Dependency.ValProperty -> {
                 when (val status = this.resolveParameters(immutability[it.type])) {
                     is ImmutabilityStatus.ConditionallyDeeplyImmutable -> status
                     is ImmutabilityStatus.Immutable -> status
@@ -28,7 +28,7 @@ fun ClassTemplate.calcStatus(
                     is ImmutabilityStatus.ShallowImmutable -> ImmutabilityStatus.ShallowImmutable()
                 }
             }
-            is Dependency.VarTo -> ImmutabilityStatus.Mutable()
+            is Dependency.VarProperty -> ImmutabilityStatus.Mutable()
             is Dependency.Error -> ImmutabilityStatus.Mutable()
             is Dependency.Outer -> this.resolveParameters(immutability[it.outer.defaultType])
             is Dependency.ValParameter -> {
@@ -40,6 +40,8 @@ fun ClassTemplate.calcStatus(
                 }
             }
             is Dependency.VarParameter -> ImmutabilityStatus.Mutable()
+            is Dependency.DelegatedValProperty -> ImmutabilityStatus.Mutable()
+            is Dependency.PropertyWithGetter -> ImmutabilityStatus.Mutable()
         }
     }
     return join(neighbors)
