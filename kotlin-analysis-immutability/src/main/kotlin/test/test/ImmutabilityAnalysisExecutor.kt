@@ -19,6 +19,7 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
 
     override fun analyse(project: Project) {
         val rf: ResolutionFacade? = null
+        /*
         val properties = PsiProvider.extractElementsOfTypeFromProject(project, KtProperty::class.java).forEach {
             val desc = it.resolveToDescriptorIfAny()
             println(desc)
@@ -28,6 +29,8 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
             val desc = it.resolveToDescriptorIfAny()
             //println(desc to it)
         }
+         */
+
 
         /*
         val objects = PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).forEach() {
@@ -53,7 +56,11 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
             ParentsExtractor(rf),
             OuterClassesExtractor(rf)
         )
-        val entities = makeEntities(rf, project, extractor)
+        val (entities, type) = makeEntities(rf, project, extractor, false)
+        if (!validateEntities(entities)) {
+            println("failed to validate project")
+            return
+        }
 
         entities.forEach {
             when (it) {
@@ -64,13 +71,13 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
             }
         }
         //println(entities)
-        //val result = solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections, KotlinFunctions)
-        //println("ok")
+        val result = solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections, KotlinFunctions)
+        println("ok")
         //println(properties)
         //println(classifiers)
-        //val stats = Statistics(result)
-        //println(stats.percentage())
-        //dataWriter.addResult(project.name, result)
+        val stats = Statistics(result)
+        println(stats.percentage())
+        dataWriter.addResult(project.name, type, result)
         //pp(entities)
         //dependenciesDataWriter.writer.println(entities)
         //dataWriter.writer.println("entities")

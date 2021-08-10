@@ -9,10 +9,10 @@ import java.io.OutputStream
 import java.nio.file.Path
 
 class CSVWriterResourceManager(private val directory: Path, private val fileName: String) : ResourceManager {
-    private val header = listOf("project", "name", "type", "immutability")
+    private val header = listOf("project", "name", "type", "immutability", "tests")
     private val writer = csvWriter { lineTerminator = System.lineSeparator() }
     private val actions = mutableListOf<ICsvFileWriter.() -> Unit>()
-    fun addResult(projectName: String, immutability: Immutability) {
+    fun addResult(projectName: String, tests: TestsType, immutability: Immutability) {
         actions.add {
             immutability.results().forEach {
                 val entity = it.first
@@ -30,7 +30,7 @@ class CSVWriterResourceManager(private val directory: Path, private val fileName
                     is ClassTemplate -> entity.classType.name
                     ErrorTemplate -> "ERROR"
                 }
-                writeRow(projectName, name, type, result)
+                writeRow(projectName, name, type, result, tests)
             }
         }
     }

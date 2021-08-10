@@ -1,14 +1,17 @@
 package test.test
 
+import arrow.core.Ior
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
+import org.jetbrains.kotlin.idea.util.sourceRoots
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtElement
@@ -68,12 +71,12 @@ class Packer(private val resolutionFacade: ResolutionFacade?) {
     }
 }
 
-fun extractPsiFilesWithoutTests(project: Project): Set<PsiFile> {
+fun extractPsiFilesWithoutTests(project: Project): Set<PsiFile>? {
     val projectPsiFiles = mutableSetOf<PsiFile>()
     //val projectRootManager = ProjectRootManager.getInstance(project)
     val psiManager = PsiManager.getInstance(project)
     ModuleManager.getInstance(project).modules.forEach {
-        println("module: $it")
+        //println("module: $it")
         ModuleRootManager.getInstance(it).getSourceRoots(false).forEach {
             //println(it)
             VfsUtilCore.iterateChildrenRecursively(it, null) { virtualFile ->
@@ -85,29 +88,71 @@ fun extractPsiFilesWithoutTests(project: Project): Set<PsiFile> {
             }
         }
     }
+    return projectPsiFiles.ifEmpty { null }
+}
+
+sealed class ExtractionResult<T : PsiElement> {
+    data class Opened<T : PsiElement>(val elements: List<T>, val type: TestsType) : ExtractionResult<T>()
+    data class Failed(val reason: String) : ExtractionResult<Nothing>()
+}
+
+fun extractPsiFilesWithoutTestPrefix(project: Project): Set<PsiFile> {
+    val projectPsiFiles = mutableSetOf<PsiFile>()
+    val projectRootManager = ProjectRootManager.getInstance(project)
+    val psiManager = PsiManager.getInstance(project)
+
+    projectRootManager.contentRoots.mapNotNull { root ->
+        VfsUtilCore.iterateChildrenRecursively(root, null) { virtualFile ->
+            if (!virtualFile.isKotlinRelatedFile() || virtualFile.canonicalPath == null || virtualFile.canonicalPath!!.contains("/test/")) {
+                return@iterateChildrenRecursively true
+            }
+            val psi = psiManager.findFile(virtualFile) ?: return@iterateChildrenRecursively true
+            //println(psi.virtualFile.canonicalPath)
+            projectPsiFiles.add(psi)
+        }
+    }
     return projectPsiFiles
 }
 
 fun <T : PsiElement> extractElementsOfTypeFromProject(
     project: Project,
-    psiElementClass: Class<T>
-): List<T> {
-    return extractPsiFilesWithoutTests(project)
-        .map { PsiTreeUtil.collectElementsOfType(it, psiElementClass) }
-        .flatten()
+    psiElementClass: Class<T>,
+    includeTests: Boolean
+): ExtractionResult.Opened<T> {
+    if (!includeTests) {
+        val withoutTests = extractPsiFilesWithoutTests(project)
+            ?: return ExtractionResult.Opened(extractPsiFilesWithoutTestPrefix(project)
+                .map { PsiTreeUtil.collectElementsOfType(it, psiElementClass) }
+                .flatten(), TestsType.WITHOUT_TEST_FOLDERS)
+        return ExtractionResult.Opened(withoutTests
+            .map { PsiTreeUtil.collectElementsOfType(it, psiElementClass) }
+            .flatten(), TestsType.WITHOUT_TEST_MODULES)
+    } else {
+        return ExtractionResult.Opened(PsiProvider.extractElementsOfTypeFromProject(project, psiElementClass), TestsType.WITH_TESTS)
+    }
+}
+
+enum class TestsType {
+    WITH_TESTS,
+    WITHOUT_TEST_MODULES,
+    WITHOUT_TEST_FOLDERS
 }
 
 fun makeEntities(
     resolutionFacade: ResolutionFacade?,
     project: Project,
-    extractor: Extractor<Dependencies>
-): List<Entity> {
+    extractor: Extractor<Dependencies>,
+    includeTests: Boolean
+): Pair<List<Entity>, TestsType> {
     val packer = Packer(resolutionFacade)
-    val classes = PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).map {
+    val (classes, type) = extractElementsOfTypeFromProject(project, KtClass::class.java, includeTests)
+    val fromClasses = classes.map {
         packer.packClass(it, extractor.fromClass(it))
     }
-    val objects = PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).map {
+    val (objects, type2) = extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java, includeTests)
+    val fromObjects = objects.map {
         packer.packObject(it, extractor.fromObject(it))
     }
-    return classes + objects
+    assert(type == type2)
+    return fromClasses + fromObjects to type
 }
