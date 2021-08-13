@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.util.PsiTreeUtil
+import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
@@ -51,6 +52,8 @@ class Packer(private val resolutionFacade: ResolutionFacade?) {
                 ktClass.isEnum() -> ClassType.ENUM_CLASS
                 ktClass.isInterface() -> ClassType.INTERFACE
                 ktClass.isSealed() -> ClassType.SEALED_CLASS
+                descriptor.kind == ClassKind.ENUM_ENTRY -> ClassType.ENUM_ENTRY
+                descriptor.kind == ClassKind.ANNOTATION_CLASS -> ClassType.ANNOTATION_CLASS
                 else -> ClassType.CLASS
             }
             ClassTemplate(it, type, deps, it.typeConstructor.parameters)

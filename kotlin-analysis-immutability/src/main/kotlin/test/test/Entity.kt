@@ -19,7 +19,9 @@ enum class ClassType {
     CLASS,
     SEALED_CLASS,
     DATA_CLASS,
+    ANNOTATION_CLASS,
     ENUM_CLASS,
+    ENUM_ENTRY,
     OBJECT,
     COMPANION_OBJECT,
     ANONYMOUS_OBJECT

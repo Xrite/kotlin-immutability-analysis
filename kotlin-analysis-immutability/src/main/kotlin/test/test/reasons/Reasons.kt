@@ -23,6 +23,12 @@ sealed class ImmutableReason : Reason() {
             override val reason = "Assumption"
         }
     }
+
+    object Initial : ImmutableReason() {
+        override val csvData = object : CSVData {
+            override val reason = "Initial"
+        }
+    }
 }
 
 sealed class ShallowImmutableReason : Reason() {

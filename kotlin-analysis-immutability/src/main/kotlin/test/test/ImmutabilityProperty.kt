@@ -3,7 +3,7 @@ package test.test
 import test.test.reasons.*
 
 sealed class ImmutabilityProperty {
-    data class Immutable(override val reasons: List<ImmutableReason> = listOf()) : ImmutabilityProperty() {
+    data class Immutable(override val reasons: List<ImmutableReason> = listOf(ImmutableReason.Initial)) : ImmutabilityProperty() {
         constructor(vararg reasons: ImmutableReason) : this(reasons.toList())
 
         override fun isByAssumption(): Boolean = reasons.size == 1 && reasons[0].isByAssumption()
