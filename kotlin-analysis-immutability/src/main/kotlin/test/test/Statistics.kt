@@ -19,7 +19,7 @@ class Statistics(private val immutability: Immutability) {
             ConditionalDeeplyImmutable: ${conditionalDeeplyImmutable.size} (${conditionalDeeplyImmutable.size / total.toDouble() * 100}%)
             Mutable: ${mutable.size} (${mutable.size / total.toDouble() * 100}%)
             Total: $total
-            Unresolved: ${unresolved.size}
+            Unresolved: ${unresolved.size} (${unresolved.size / total.toDouble() * 100}%)
         """.trimIndent()
     }
 }
