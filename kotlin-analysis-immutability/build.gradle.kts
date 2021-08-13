@@ -13,6 +13,7 @@ dependencies {
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:0.15.2")
     implementation("io.arrow-kt:arrow-core:$arrow_version")
     implementation("io.arrow-kt:arrow-syntax:$arrow_version")
+    implementation("org.apache.commons:commons-csv:1.9.0")
     //implementation("com.xenomachina:kotlin-argparser:2.0.7")
 
 }

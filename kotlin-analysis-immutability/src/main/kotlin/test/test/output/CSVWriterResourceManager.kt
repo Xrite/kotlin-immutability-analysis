@@ -12,11 +12,10 @@ import java.io.OutputStream
 import java.nio.file.Path
 
 class CSVWriterResourceManager(private val directory: Path, private val fileName: String) : ResourceManager {
-    private val header = listOf("project", "name", "type", "immutability", "tests", "reason")
+    private val header = listOf("project", "name", "type", "immutability", "tests", "reason", "info")
     fun addResult(projectName: String, tests: TestsType, immutability: Immutability) {
-        immutability.results().forEach {
-            val entity = it.first
-            val result = when (it.second) {
+        immutability.results().forEach { (entity, status) ->
+            val result = when (status) {
                 is ImmutabilityStatus.ConditionallyDeeplyImmutable -> "ConditionallyDeeplyImmutable"
                 is ImmutabilityStatus.Immutable -> "Immutable"
                 is ImmutabilityStatus.Mutable -> "Mutable"
@@ -30,7 +29,10 @@ class CSVWriterResourceManager(private val directory: Path, private val fileName
                 is ClassTemplate -> entity.classType.name
                 ErrorTemplate -> "ERROR"
             }
-            printer.printRecord(projectName, name, type, result, tests)
+            status.reasons.forEach {
+                val data = it.csvData
+                printer.printRecord(projectName, name, type, result, tests, data.reason, data.info)
+            }
         }
     }
 

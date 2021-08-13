@@ -12,11 +12,14 @@ import org.jetbrains.research.ml.kotlinAnalysis.ResourceManager
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 import test.test.extractors.*
 import java.nio.file.Path
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
-    private val dataWriter = CSVWriterResourceManager(outputDir, "results2.csv")
+    private val dataWriter = CSVWriterResourceManager(outputDir, "results_tests.csv")
     override val controlledResourceManagers: Set<ResourceManager> = setOf(dataWriter)
 
+    @OptIn(ExperimentalTime::class)
     override fun analyse(project: Project) {
         val rf: ResolutionFacade? = null
         /*
@@ -56,37 +59,28 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
             ParentsExtractor(rf),
             OuterClassesExtractor(rf)
         )
-        val (entities, type) = makeEntities(rf, project, extractor, false)
-        if (!validateEntities(entities)) {
-            println("failed to validate project")
-            return
-        }
 
-        entities.forEach {
-            when (it) {
-                is ClassTemplate -> if (it.desc.fqNameSafe.asString().contains("Library")) {
-                   println(it)
-                }
-                ErrorTemplate -> {}
+        val time = measureTime {
+            print("Extracting entities...")
+            val (entities, type) = makeEntities(rf, project, extractor, false)
+            println("done")
+
+            if (!validateEntities(entities)) {
+                println("failed to validate project")
+                return
             }
-        }
-        //println(entities)
-        val result = solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections, KotlinFunctions)
-        println("ok")
-        //println(properties)
-        //println(classifiers)
-        val stats = Statistics(result)
-        println(stats.percentage())
-        dataWriter.addResult(project.name, type, result)
-        //pp(entities)
-        //dependenciesDataWriter.writer.println(entities)
-        //dataWriter.writer.println("entities")
-        //dataWriter.writer.println(entities)
 
-        //dependenciesDataWriter.writer.println("properties")
-        //dependenciesDataWriter.writer.println(properties)
-        //dependenciesDataWriter.writer.println("classes")
-        //dependenciesDataWriter.writer.println(classifiers)
-        //dependenciesDataWriter.writer.println("")
+            //println(entities)
+            val result =
+                solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections, KotlinFunctions)
+            println("ok")
+            //println(properties)
+            //println(classifiers)
+            val stats = Statistics(result)
+            println(stats.percentage())
+            dataWriter.addResult(project.name, type, result)
+        }
+        println("Analysis done in $time")
+        //pp(entities)
     }
 }

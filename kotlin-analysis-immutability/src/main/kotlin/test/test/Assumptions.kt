@@ -30,16 +30,16 @@ object KotlinBasicTypes : Assumptions {
 
 object KotlinCollections : Assumptions {
     val types = mapOf(
-        "kotlin.collections.Iterable" to ImmutabilityStatus.ConditionallyDeeplyImmutable(setOf(0)),
-        "kotlin.collections.Collection" to ImmutabilityStatus.ConditionallyDeeplyImmutable(setOf(0)),
+        "kotlin.collections.Iterable" to ImmutabilityStatus.ConditionallyDeeplyImmutable(setOf(0), ConditionallyDeeplyImmutableReason.ByAssumption),
+        "kotlin.collections.Collection" to ImmutabilityStatus.ConditionallyDeeplyImmutable(setOf(0), ConditionallyDeeplyImmutableReason.ByAssumption),
         "kotlin.collections.List" to ImmutabilityStatus.ConditionallyDeeplyImmutable(setOf(0)),
         "kotlin.collections.Set" to ImmutabilityStatus.ConditionallyDeeplyImmutable(setOf(0)),
         "kotlin.collections.Map" to ImmutabilityStatus.ConditionallyDeeplyImmutable(setOf(0, 1)),
-        "kotlin.collections.MutableIterable" to ImmutabilityStatus.Mutable(),
-        "kotlin.collections.MutableCollection" to ImmutabilityStatus.Mutable(),
-        "kotlin.collections.MutableList" to ImmutabilityStatus.Mutable(),
-        "kotlin.collections.MutableSet" to ImmutabilityStatus.Mutable(),
-        "kotlin.collections.MutableMap" to ImmutabilityStatus.Mutable()
+        "kotlin.collections.MutableIterable" to ImmutabilityStatus.Mutable(MutableReason.ByAssumption),
+        "kotlin.collections.MutableCollection" to ImmutabilityStatus.Mutable(MutableReason.ByAssumption),
+        "kotlin.collections.MutableList" to ImmutabilityStatus.Mutable(MutableReason.ByAssumption),
+        "kotlin.collections.MutableSet" to ImmutabilityStatus.Mutable(MutableReason.ByAssumption),
+        "kotlin.collections.MutableMap" to ImmutabilityStatus.Mutable(MutableReason.ByAssumption)
     )
 
     override fun get(name: String): ImmutabilityStatus? = types[name]
@@ -55,8 +55,6 @@ object KotlinFunctions : Assumptions {
 }
 
 object JavaAssumedImmutableTypes : Assumptions {
-    // TODO: drop stuff which is NOT immutable in Java
-    //       (like `java.util.Map`)
     val types = setOf(
         "java.io.File",
         "java.io.Serializable",
@@ -78,17 +76,10 @@ object JavaAssumedImmutableTypes : Assumptions {
         "java.util.AbstractCollection",
         "java.util.AbstractSet",
         "java.util.Comparator",
-        "java.util.Dictionary",
-        "java.util.Enumeration",
-        "java.util.Iterator",
-        "java.util.List",
-        "java.util.Map",
-        "java.util.Random",
-        "java.util.Set"
     )
 
     override fun get(name: String): ImmutabilityStatus? = if (name in types) {
-        ImmutabilityStatus.Immutable()
+        ImmutabilityStatus.Immutable(ImmutableReason.ByAssumption)
     } else {
         null
     }

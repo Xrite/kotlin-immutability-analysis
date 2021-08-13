@@ -1,13 +1,23 @@
 package test.test
 
+import javax.print.attribute.standard.MediaSize
+
 sealed class ImmutabilityStatus {
-    data class Immutable(val reasons: List<ImmutableReason> = listOf()) : ImmutabilityStatus() {
+    data class Immutable(override val reasons: List<ImmutableReason> = listOf()) : ImmutabilityStatus() {
+        constructor(vararg reasons: ImmutableReason) : this(reasons.toList())
+
+        override fun isByAssumption(): Boolean = reasons.size == 1 && reasons[0].isByAssumption()
+
         override fun toString(): String {
             return "Immutable"
         }
     }
 
-    data class ShallowImmutable(val reasons: List<ShallowImmutableReason> = listOf()) : ImmutabilityStatus() {
+    data class ShallowImmutable(override val reasons: List<ShallowImmutableReason> = listOf()) : ImmutabilityStatus() {
+        constructor(vararg reasons: ShallowImmutableReason) : this(reasons.toList())
+
+        override fun isByAssumption(): Boolean = reasons.size == 1 && reasons[0].isByAssumption()
+
         override fun toString(): String {
             return "ShallowImmutable"
         }
@@ -15,18 +25,33 @@ sealed class ImmutabilityStatus {
 
     data class ConditionallyDeeplyImmutable(
         val conditions: Set<Int>,
-        val reasons: List<ConditionalDeeplyImmutableReason> = listOf()
+        override val reasons: List<ConditionallyDeeplyImmutableReason> = listOf()
     ) : ImmutabilityStatus() {
+        constructor(conditions: Set<Int>, vararg reasons: ConditionallyDeeplyImmutableReason) : this(
+            conditions,
+            reasons.toList()
+        )
+
+        override fun isByAssumption(): Boolean = reasons.size == 1 && reasons[0].isByAssumption()
+
         override fun toString(): String {
             return "ConditionallyDeeplyImmutable($conditions)"
         }
     }
 
-    data class Mutable(val reasons: List<MutableReason> = listOf()) : ImmutabilityStatus() {
+    data class Mutable(override val reasons: List<MutableReason> = listOf()) : ImmutabilityStatus() {
+        constructor(vararg reasons: MutableReason) : this(reasons.toList())
+
+        override fun isByAssumption(): Boolean = reasons.size == 1 && reasons[0].isByAssumption()
+
         override fun toString(): String {
             return "Mutable"
         }
     }
+
+    abstract fun isByAssumption(): Boolean
+
+    abstract val reasons: List<Reason>
 }
 
 fun join(statuses: List<ImmutabilityStatus>): ImmutabilityStatus = when {
@@ -58,3 +83,7 @@ fun join(statuses: List<ImmutabilityStatus>): ImmutabilityStatus = when {
 }
 
 fun join(vararg statuses: ImmutabilityStatus): ImmutabilityStatus = join(statuses.toList())
+
+infix fun ImmutabilityStatus.hasSameStatus(other: ImmutabilityStatus): Boolean {
+    return this::class == other::class
+}
