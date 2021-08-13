@@ -21,7 +21,7 @@ fun solve(entities: List<Entity>, vararg assumptions: Assumptions): Immutability
                 is ClassTemplate -> entity.calcStatus(immutability)
                 ErrorTemplate -> ImmutabilityProperty.Mutable()
             }
-            if (immutability.update(entity, newStatus)) {
+            if (immutability.set(entity, newStatus)) {
                 updated = true
             }
         }
