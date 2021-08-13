@@ -1,5 +1,9 @@
 package test.test
 
+import test.test.reasons.ConditionallyDeeplyImmutableReason
+import test.test.reasons.ImmutableReason
+import test.test.reasons.MutableReason
+
 fun interface Assumptions {
     fun get(name: String): ImmutabilityStatus?
 }

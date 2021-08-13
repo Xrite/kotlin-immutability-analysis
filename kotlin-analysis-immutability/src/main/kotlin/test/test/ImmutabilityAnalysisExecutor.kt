@@ -3,14 +3,12 @@ package test.test
 import com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
-import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
-import org.jetbrains.kotlin.psi.KtProperty
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.research.ml.kotlinAnalysis.AnalysisExecutor
 import org.jetbrains.research.ml.kotlinAnalysis.ResourceManager
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 import test.test.extractors.*
+import test.test.output.CSVWriterResourceManager
 import java.nio.file.Path
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime

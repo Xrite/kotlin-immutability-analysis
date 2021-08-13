@@ -1,6 +1,6 @@
 package test.test
 
-import javax.print.attribute.standard.MediaSize
+import test.test.reasons.*
 
 sealed class ImmutabilityStatus {
     data class Immutable(override val reasons: List<ImmutableReason> = listOf()) : ImmutabilityStatus() {

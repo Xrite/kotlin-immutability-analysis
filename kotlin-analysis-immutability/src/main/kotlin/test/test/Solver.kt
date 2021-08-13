@@ -1,6 +1,9 @@
 package test.test
 
 import test.test.Immutability.Result.Reason.*
+import test.test.reasons.ConditionallyDeeplyImmutableReason
+import test.test.reasons.MutableReason
+import test.test.reasons.ShallowImmutableReason
 
 private fun ClassTemplate.calcStatus(
     immutability: Immutability

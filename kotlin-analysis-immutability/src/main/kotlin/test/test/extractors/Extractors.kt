@@ -1,6 +1,5 @@
-package test.test
+package test.test.extractors
 
-import arrow.core.Ior
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
@@ -11,13 +10,13 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
-import org.jetbrains.kotlin.idea.util.sourceRoots
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 import org.jetbrains.research.ml.kotlinAnalysis.util.isKotlinRelatedFile
+import test.test.*
 
 interface Extractor<R> {
     fun fromClass(psiElement: KtClass): R
@@ -128,7 +127,10 @@ fun <T : PsiElement> extractElementsOfTypeFromProject(
             .map { PsiTreeUtil.collectElementsOfType(it, psiElementClass) }
             .flatten(), TestsType.WITHOUT_TEST_MODULES)
     } else {
-        return ExtractionResult.Opened(PsiProvider.extractElementsOfTypeFromProject(project, psiElementClass), TestsType.WITH_TESTS)
+        return ExtractionResult.Opened(
+            PsiProvider.extractElementsOfTypeFromProject(project, psiElementClass),
+            TestsType.WITH_TESTS
+        )
     }
 }
 

@@ -1,14 +1,12 @@
-package test.test
+package test.test.output
 
-import com.github.doyaaaaaken.kotlincsv.client.ICsvFileWriter
-import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.research.ml.kotlinAnalysis.ResourceManager
+import test.test.*
+import test.test.extractors.TestsType
 import java.io.File
-import java.io.FileWriter
-import java.io.OutputStream
 import java.nio.file.Path
 
 class CSVWriterResourceManager(private val directory: Path, private val fileName: String) : ResourceManager {
