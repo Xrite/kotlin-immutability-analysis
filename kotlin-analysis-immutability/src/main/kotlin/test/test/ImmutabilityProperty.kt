@@ -2,8 +2,8 @@ package test.test
 
 import test.test.reasons.*
 
-sealed class ImmutabilityStatus {
-    data class Immutable(override val reasons: List<ImmutableReason> = listOf()) : ImmutabilityStatus() {
+sealed class ImmutabilityProperty {
+    data class Immutable(override val reasons: List<ImmutableReason> = listOf()) : ImmutabilityProperty() {
         constructor(vararg reasons: ImmutableReason) : this(reasons.toList())
 
         override fun isByAssumption(): Boolean = reasons.size == 1 && reasons[0].isByAssumption()
@@ -13,7 +13,7 @@ sealed class ImmutabilityStatus {
         }
     }
 
-    data class ShallowImmutable(override val reasons: List<ShallowImmutableReason> = listOf()) : ImmutabilityStatus() {
+    data class ShallowImmutable(override val reasons: List<ShallowImmutableReason> = listOf()) : ImmutabilityProperty() {
         constructor(vararg reasons: ShallowImmutableReason) : this(reasons.toList())
 
         override fun isByAssumption(): Boolean = reasons.size == 1 && reasons[0].isByAssumption()
@@ -26,7 +26,7 @@ sealed class ImmutabilityStatus {
     data class ConditionallyDeeplyImmutable(
         val conditions: Set<Int>,
         override val reasons: List<ConditionallyDeeplyImmutableReason> = listOf()
-    ) : ImmutabilityStatus() {
+    ) : ImmutabilityProperty() {
         constructor(conditions: Set<Int>, vararg reasons: ConditionallyDeeplyImmutableReason) : this(
             conditions,
             reasons.toList()
@@ -39,7 +39,7 @@ sealed class ImmutabilityStatus {
         }
     }
 
-    data class Mutable(override val reasons: List<MutableReason> = listOf()) : ImmutabilityStatus() {
+    data class Mutable(override val reasons: List<MutableReason> = listOf()) : ImmutabilityProperty() {
         constructor(vararg reasons: MutableReason) : this(reasons.toList())
 
         override fun isByAssumption(): Boolean = reasons.size == 1 && reasons[0].isByAssumption()
@@ -54,36 +54,36 @@ sealed class ImmutabilityStatus {
     abstract val reasons: List<Reason>
 }
 
-fun join(statuses: List<ImmutabilityStatus>): ImmutabilityStatus = when {
-    statuses.anyIsInstance<ImmutabilityStatus.Mutable>() -> {
-        val reasons = statuses.filterIsInstance<ImmutabilityStatus.Mutable>().flatMap {
+fun join(statuses: List<ImmutabilityProperty>): ImmutabilityProperty = when {
+    statuses.anyIsInstance<ImmutabilityProperty.Mutable>() -> {
+        val reasons = statuses.filterIsInstance<ImmutabilityProperty.Mutable>().flatMap {
             it.reasons
         }
-        ImmutabilityStatus.Mutable(reasons)
+        ImmutabilityProperty.Mutable(reasons)
     }
-    statuses.anyIsInstance<ImmutabilityStatus.ShallowImmutable>() -> {
-        val reasons = statuses.filterIsInstance<ImmutabilityStatus.ShallowImmutable>().flatMap {
+    statuses.anyIsInstance<ImmutabilityProperty.ShallowImmutable>() -> {
+        val reasons = statuses.filterIsInstance<ImmutabilityProperty.ShallowImmutable>().flatMap {
             it.reasons
         }
-        ImmutabilityStatus.ShallowImmutable(reasons)
+        ImmutabilityProperty.ShallowImmutable(reasons)
     }
-    statuses.anyIsInstance<ImmutabilityStatus.ConditionallyDeeplyImmutable>() -> {
-        val cdis = statuses.filterIsInstance<ImmutabilityStatus.ConditionallyDeeplyImmutable>()
+    statuses.anyIsInstance<ImmutabilityProperty.ConditionallyDeeplyImmutable>() -> {
+        val cdis = statuses.filterIsInstance<ImmutabilityProperty.ConditionallyDeeplyImmutable>()
 
         val conditions = cdis.flatMap { it.conditions }.toSet()
         val reasons = cdis.flatMap { it.reasons }
-        ImmutabilityStatus.ConditionallyDeeplyImmutable(conditions, reasons)
+        ImmutabilityProperty.ConditionallyDeeplyImmutable(conditions, reasons)
     }
     else -> {
-        val reasons = statuses.filterIsInstance<ImmutabilityStatus.Immutable>().flatMap {
+        val reasons = statuses.filterIsInstance<ImmutabilityProperty.Immutable>().flatMap {
             it.reasons
         }
-        ImmutabilityStatus.Immutable(reasons)
+        ImmutabilityProperty.Immutable(reasons)
     }
 }
 
-fun join(vararg statuses: ImmutabilityStatus): ImmutabilityStatus = join(statuses.toList())
+fun join(vararg statuses: ImmutabilityProperty): ImmutabilityProperty = join(statuses.toList())
 
-infix fun ImmutabilityStatus.hasSameStatus(other: ImmutabilityStatus): Boolean {
+infix fun ImmutabilityProperty.hasSameStatus(other: ImmutabilityProperty): Boolean {
     return this::class == other::class
 }

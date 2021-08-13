@@ -11,8 +11,8 @@ import test.test.reasons.ShallowImmutableReason
 
 sealed class Dependency {
     data class DebugType(val debug: List<Any?>) : Dependency() {
-        override fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus =
-            ImmutabilityStatus.Immutable()
+        override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
+            ImmutabilityProperty.Immutable()
     }
 
     data class ValParameter(
@@ -26,53 +26,53 @@ sealed class Dependency {
                 ValParameter(desc, desc.type, listOf(desc.type.arguments))
         }
 
-        override fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus =
+        override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
             when (val status = resolve(type)) {
-                is Immutability.Result.ConditionallyDeeplyImmutable -> {
+                is ImmutabilityMap.Result.ConditionallyDeeplyImmutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> ConditionallyDeeplyImmutableReason.ValPropertyConditionallyDeeplyImmutable(
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> ConditionallyDeeplyImmutableReason.ValPropertyConditionallyDeeplyImmutable(
                             byAssumption = true,
                             isParameter = true
                         )
-                        Immutability.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
-                        Immutability.Result.Reason.RESOLVED -> ConditionallyDeeplyImmutableReason.ValPropertyConditionallyDeeplyImmutable(
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
+                        ImmutabilityMap.Result.Reason.RESOLVED -> ConditionallyDeeplyImmutableReason.ValPropertyConditionallyDeeplyImmutable(
                             byAssumption = false,
                             isParameter = true
                         )
                     }
-                    ImmutabilityStatus.ConditionallyDeeplyImmutable(status.conditions, reason)
+                    ImmutabilityProperty.ConditionallyDeeplyImmutable(status.conditions, reason)
                 }
-                is Immutability.Result.Immutable -> ImmutabilityStatus.Immutable()
-                is Immutability.Result.Mutable -> {
+                is ImmutabilityMap.Result.Immutable -> ImmutabilityProperty.Immutable()
+                is ImmutabilityMap.Result.Mutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
                             ShallowImmutableReason.Type.MUTABLE_BY_ASSUMPTION,
                             true
                         )
-                        Immutability.Result.Reason.UNKNOWN -> ShallowImmutableReason.ValProperty(
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> ShallowImmutableReason.ValProperty(
                             ShallowImmutableReason.Type.UNKNOWN,
                             true
                         )
-                        Immutability.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
+                        ImmutabilityMap.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
                             ShallowImmutableReason.Type.MUTABLE,
                             true
                         )
                     }
-                    ImmutabilityStatus.ShallowImmutable(reason)
+                    ImmutabilityProperty.ShallowImmutable(reason)
                 }
-                is Immutability.Result.ShallowImmutable -> {
+                is ImmutabilityMap.Result.ShallowImmutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
                             ShallowImmutableReason.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION,
                             true
                         )
-                        Immutability.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
-                        Immutability.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
+                        ImmutabilityMap.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
                             ShallowImmutableReason.Type.SHALLOW_IMMUTABLE,
                             true
                         )
                     }
-                    ImmutabilityStatus.ShallowImmutable(reason)
+                    ImmutabilityProperty.ShallowImmutable(reason)
                 }
             }
     }
@@ -88,8 +88,8 @@ sealed class Dependency {
                 VarParameter(desc, desc.type, listOf(desc.type.arguments))
         }
 
-        override fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus =
-            ImmutabilityStatus.Mutable(MutableReason.VarProperty(true))
+        override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
+            ImmutabilityProperty.Mutable(MutableReason.VarProperty(true))
     }
 
     data class ValProperty(
@@ -103,53 +103,53 @@ sealed class Dependency {
                 ValProperty(desc, desc.type, listOf(desc.type.arguments))
         }
 
-        override fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus =
+        override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
             when (val status = resolve(type)) {
-                is Immutability.Result.ConditionallyDeeplyImmutable -> {
+                is ImmutabilityMap.Result.ConditionallyDeeplyImmutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> ConditionallyDeeplyImmutableReason.ValPropertyConditionallyDeeplyImmutable(
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> ConditionallyDeeplyImmutableReason.ValPropertyConditionallyDeeplyImmutable(
                             byAssumption = true,
                             isParameter = false
                         )
-                        Immutability.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
-                        Immutability.Result.Reason.RESOLVED -> ConditionallyDeeplyImmutableReason.ValPropertyConditionallyDeeplyImmutable(
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
+                        ImmutabilityMap.Result.Reason.RESOLVED -> ConditionallyDeeplyImmutableReason.ValPropertyConditionallyDeeplyImmutable(
                             byAssumption = false,
                             isParameter = false
                         )
                     }
-                    ImmutabilityStatus.ConditionallyDeeplyImmutable(status.conditions, reason)
+                    ImmutabilityProperty.ConditionallyDeeplyImmutable(status.conditions, reason)
                 }
-                is Immutability.Result.Immutable -> ImmutabilityStatus.Immutable()
-                is Immutability.Result.Mutable -> {
+                is ImmutabilityMap.Result.Immutable -> ImmutabilityProperty.Immutable()
+                is ImmutabilityMap.Result.Mutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
                             ShallowImmutableReason.Type.MUTABLE_BY_ASSUMPTION,
                             false
                         )
-                        Immutability.Result.Reason.UNKNOWN -> ShallowImmutableReason.ValProperty(
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> ShallowImmutableReason.ValProperty(
                             ShallowImmutableReason.Type.UNKNOWN,
                             false
                         )
-                        Immutability.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
+                        ImmutabilityMap.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
                             ShallowImmutableReason.Type.MUTABLE,
                             false
                         )
                     }
-                    ImmutabilityStatus.ShallowImmutable(reason)
+                    ImmutabilityProperty.ShallowImmutable(reason)
                 }
-                is Immutability.Result.ShallowImmutable -> {
+                is ImmutabilityMap.Result.ShallowImmutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
                             ShallowImmutableReason.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION,
                             false
                         )
-                        Immutability.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
-                        Immutability.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
+                        ImmutabilityMap.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
                             ShallowImmutableReason.Type.SHALLOW_IMMUTABLE,
                             false
                         )
                     }
-                    ImmutabilityStatus.ShallowImmutable(reason)
+                    ImmutabilityProperty.ShallowImmutable(reason)
                 }
             }
     }
@@ -165,8 +165,8 @@ sealed class Dependency {
                 VarProperty(desc, desc.type, listOf(desc.type.arguments))
         }
 
-        override fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus =
-            ImmutabilityStatus.Mutable(MutableReason.VarProperty(false))
+        override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
+            ImmutabilityProperty.Mutable(MutableReason.VarProperty(false))
     }
 
     data class PropertyWithGetter(
@@ -180,8 +180,8 @@ sealed class Dependency {
                 PropertyWithGetter(desc, desc.type)
         }
 
-        override fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus =
-            ImmutabilityStatus.Mutable(MutableReason.PropertyWithGetter)
+        override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
+            ImmutabilityProperty.Mutable(MutableReason.PropertyWithGetter)
     }
 
     data class DelegatedValProperty(
@@ -196,8 +196,8 @@ sealed class Dependency {
                 DelegatedValProperty(desc, desc.type, delegate)
         }
 
-        override fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus =
-            ImmutabilityStatus.Mutable(MutableReason.DelegatedProperty)
+        override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
+            ImmutabilityProperty.Mutable(MutableReason.DelegatedProperty)
     }
 
     data class Parent(
@@ -212,36 +212,36 @@ sealed class Dependency {
                     ?: Error("Parent doesn't have ClassifierDescriptor, type: $kotlinType")
         }
 
-        override fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus =
+        override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
             when (val status = resolve(type)) {
-                is Immutability.Result.ConditionallyDeeplyImmutable -> {
+                is ImmutabilityMap.Result.ConditionallyDeeplyImmutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> ConditionallyDeeplyImmutableReason.ParentTypeConditionallyDeeplyImmutable(
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> ConditionallyDeeplyImmutableReason.ParentTypeConditionallyDeeplyImmutable(
                             true
                         )
-                        Immutability.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
-                        Immutability.Result.Reason.RESOLVED -> ConditionallyDeeplyImmutableReason.ParentTypeConditionallyDeeplyImmutable(
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
+                        ImmutabilityMap.Result.Reason.RESOLVED -> ConditionallyDeeplyImmutableReason.ParentTypeConditionallyDeeplyImmutable(
                             false
                         )
                     }
-                    ImmutabilityStatus.ConditionallyDeeplyImmutable(status.conditions, reason)
+                    ImmutabilityProperty.ConditionallyDeeplyImmutable(status.conditions, reason)
                 }
-                is Immutability.Result.Immutable -> ImmutabilityStatus.Immutable()
-                is Immutability.Result.Mutable -> {
+                is ImmutabilityMap.Result.Immutable -> ImmutabilityProperty.Immutable()
+                is ImmutabilityMap.Result.Mutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> MutableReason.ParentType(MutableReason.ParentType.Type.MUTABLE_BY_ASSUMPTION)
-                        Immutability.Result.Reason.UNKNOWN -> MutableReason.ParentType(MutableReason.ParentType.Type.UNKNOWN)
-                        Immutability.Result.Reason.RESOLVED -> MutableReason.ParentType(MutableReason.ParentType.Type.MUTABLE)
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> MutableReason.ParentType(MutableReason.ParentType.Type.MUTABLE_BY_ASSUMPTION)
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> MutableReason.ParentType(MutableReason.ParentType.Type.UNKNOWN)
+                        ImmutabilityMap.Result.Reason.RESOLVED -> MutableReason.ParentType(MutableReason.ParentType.Type.MUTABLE)
                     }
-                    ImmutabilityStatus.Mutable(reason)
+                    ImmutabilityProperty.Mutable(reason)
                 }
-                is Immutability.Result.ShallowImmutable -> {
+                is ImmutabilityMap.Result.ShallowImmutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ParentTypeShallowImmutable(true)
-                        Immutability.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
-                        Immutability.Result.Reason.RESOLVED -> ShallowImmutableReason.ParentTypeShallowImmutable(false)
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ParentTypeShallowImmutable(true)
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
+                        ImmutabilityMap.Result.Reason.RESOLVED -> ShallowImmutableReason.ParentTypeShallowImmutable(false)
                     }
-                    ImmutabilityStatus.ShallowImmutable(reason)
+                    ImmutabilityProperty.ShallowImmutable(reason)
                 }
             }
     }
@@ -250,36 +250,36 @@ sealed class Dependency {
         val outer: ClassifierDescriptor,
         val debug: List<Any?> = listOf()
     ) : Dependency() {
-        override fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus =
+        override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
             when (val status = resolve(outer.defaultType)) {
-                is Immutability.Result.ConditionallyDeeplyImmutable -> {
+                is ImmutabilityMap.Result.ConditionallyDeeplyImmutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> ConditionallyDeeplyImmutableReason.OuterClassTypeConditionallyDeeplyImmutable(
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> ConditionallyDeeplyImmutableReason.OuterClassTypeConditionallyDeeplyImmutable(
                             true
                         )
-                        Immutability.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
-                        Immutability.Result.Reason.RESOLVED -> ConditionallyDeeplyImmutableReason.OuterClassTypeConditionallyDeeplyImmutable(
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
+                        ImmutabilityMap.Result.Reason.RESOLVED -> ConditionallyDeeplyImmutableReason.OuterClassTypeConditionallyDeeplyImmutable(
                             false
                         )
                     }
-                    ImmutabilityStatus.ConditionallyDeeplyImmutable(status.conditions, reason)
+                    ImmutabilityProperty.ConditionallyDeeplyImmutable(status.conditions, reason)
                 }
-                is Immutability.Result.Immutable -> ImmutabilityStatus.Immutable()
-                is Immutability.Result.Mutable -> {
+                is ImmutabilityMap.Result.Immutable -> ImmutabilityProperty.Immutable()
+                is ImmutabilityMap.Result.Mutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> MutableReason.OuterClass(MutableReason.OuterClass.Type.MUTABLE_BY_ASSUMPTION)
-                        Immutability.Result.Reason.UNKNOWN -> throw IllegalArgumentException("Outer class unknown")
-                        Immutability.Result.Reason.RESOLVED -> MutableReason.OuterClass(MutableReason.OuterClass.Type.MUTABLE)
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> MutableReason.OuterClass(MutableReason.OuterClass.Type.MUTABLE_BY_ASSUMPTION)
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("Outer class unknown")
+                        ImmutabilityMap.Result.Reason.RESOLVED -> MutableReason.OuterClass(MutableReason.OuterClass.Type.MUTABLE)
                     }
-                    ImmutabilityStatus.Mutable(reason)
+                    ImmutabilityProperty.Mutable(reason)
                 }
-                is Immutability.Result.ShallowImmutable -> {
+                is ImmutabilityMap.Result.ShallowImmutable -> {
                     val reason = when (status.reason) {
-                        Immutability.Result.Reason.ASSUMPTION -> ShallowImmutableReason.OuterClassShallowImmutable(true)
-                        Immutability.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
-                        Immutability.Result.Reason.RESOLVED -> ShallowImmutableReason.OuterClassShallowImmutable(false)
+                        ImmutabilityMap.Result.Reason.ASSUMPTION -> ShallowImmutableReason.OuterClassShallowImmutable(true)
+                        ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
+                        ImmutabilityMap.Result.Reason.RESOLVED -> ShallowImmutableReason.OuterClassShallowImmutable(false)
                     }
-                    ImmutabilityStatus.ShallowImmutable(reason)
+                    ImmutabilityProperty.ShallowImmutable(reason)
                 }
             }
     }
@@ -288,11 +288,11 @@ sealed class Dependency {
         val reason: Any?,
         val debug: List<Any?> = listOf()
     ) : Dependency() {
-        override fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus =
-            ImmutabilityStatus.Mutable(MutableReason.Error)
+        override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
+            ImmutabilityProperty.Mutable(MutableReason.Error)
     }
 
-    abstract fun recalculate(resolve: (KotlinType) -> Immutability.Result): ImmutabilityStatus
+    abstract fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty
 
 }
 

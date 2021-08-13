@@ -1,18 +1,15 @@
 package test.test
 
-import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
-
-class Statistics(private val immutability: Immutability) {
+class Statistics(private val immutabilityMap: ImmutabilityMap) {
     // TODO: Add error percentage to the results
     fun percentage(): String {
-        val results = immutability.results()
-        val immutable = results.filter { it.second is ImmutabilityStatus.Immutable }
-        val shallowImmutable = results.filter { it.second is ImmutabilityStatus.ShallowImmutable }
-        val mutable = results.filter { it.second is ImmutabilityStatus.Mutable }
-        val conditionalDeeplyImmutable = results.filter { it.second is ImmutabilityStatus.ConditionallyDeeplyImmutable }
+        val results = immutabilityMap.results()
+        val immutable = results.filter { it.second is ImmutabilityProperty.Immutable }
+        val shallowImmutable = results.filter { it.second is ImmutabilityProperty.ShallowImmutable }
+        val mutable = results.filter { it.second is ImmutabilityProperty.Mutable }
+        val conditionalDeeplyImmutable = results.filter { it.second is ImmutabilityProperty.ConditionallyDeeplyImmutable }
         val total = results.size
-        val unresolved = immutability.unresolvedEntities()
+        val unresolved = immutabilityMap.unresolvedEntities()
         return """
             Immutable: ${immutable.size} (${immutable.size / total.toDouble() * 100}%)
             ShallowImmutable: ${shallowImmutable.size} (${shallowImmutable.size / total.toDouble() * 100}%)

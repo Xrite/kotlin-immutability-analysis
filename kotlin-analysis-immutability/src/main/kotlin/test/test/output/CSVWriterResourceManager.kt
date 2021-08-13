@@ -11,13 +11,13 @@ import java.nio.file.Path
 
 class CSVWriterResourceManager(private val directory: Path, private val fileName: String) : ResourceManager {
     private val header = listOf("project", "name", "type", "immutability", "tests", "reason", "info")
-    fun addResult(projectName: String, tests: TestsType, immutability: Immutability) {
-        immutability.results().forEach { (entity, status) ->
+    fun addResult(projectName: String, tests: TestsType, immutabilityMap: ImmutabilityMap) {
+        immutabilityMap.results().forEach { (entity, status) ->
             val result = when (status) {
-                is ImmutabilityStatus.ConditionallyDeeplyImmutable -> "ConditionallyDeeplyImmutable"
-                is ImmutabilityStatus.Immutable -> "Immutable"
-                is ImmutabilityStatus.Mutable -> "Mutable"
-                is ImmutabilityStatus.ShallowImmutable -> "ShallowImmutable"
+                is ImmutabilityProperty.ConditionallyDeeplyImmutable -> "ConditionallyDeeplyImmutable"
+                is ImmutabilityProperty.Immutable -> "Immutable"
+                is ImmutabilityProperty.Mutable -> "Mutable"
+                is ImmutabilityProperty.ShallowImmutable -> "ShallowImmutable"
             }
             val name = when (entity) {
                 is ClassTemplate -> entity.desc.fqNameSafe.asString()

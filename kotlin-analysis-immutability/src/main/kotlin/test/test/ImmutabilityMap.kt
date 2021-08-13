@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.types.typeUtil.asTypeProjection
 import org.jetbrains.kotlin.types.typeUtil.isTypeParameter
 import kotlin.IllegalArgumentException
 
-class Immutability(private val entities: List<Entity>, private vararg val assumptions: Assumptions) {
+class ImmutabilityMap(private val entities: List<Entity>, private vararg val assumptions: Assumptions) {
     sealed class Result(val reason: Reason) {
         class Immutable(reason: Reason = Reason.RESOLVED) : Result(reason) {
             override fun toString(): String {
@@ -57,14 +57,14 @@ class Immutability(private val entities: List<Entity>, private vararg val assump
         else -> Result.Immutable()
     }
 
-    private val map: MutableMap<DeclarationDescriptor, ImmutabilityStatus> = entities.mapNotNull {
+    private val map: MutableMap<DeclarationDescriptor, ImmutabilityProperty> = entities.mapNotNull {
         when (it) {
             is ClassTemplate -> it.desc
             ErrorTemplate -> null
         }
-    }.associateWith { ImmutabilityStatus.Immutable() }.toMutableMap()
+    }.associateWith { ImmutabilityProperty.Immutable() }.toMutableMap()
 
-    inner class WithContext(context: List<TypeParameterDescriptor>) {
+    inner class Resolver(context: List<TypeParameterDescriptor>) {
         private val indices = context.associate { it.original.typeConstructor to it.index }
 
         private fun index(projection: TypeProjection) = indices[projection.type.constructor]
@@ -74,7 +74,7 @@ class Immutability(private val entities: List<Entity>, private vararg val assump
             parameters: List<TypeProjection>
         ): Result = mapWithAssumptions(descriptor)?.let {
             when (it) {
-                is ImmutabilityStatus.ConditionallyDeeplyImmutable -> {
+                is ImmutabilityProperty.ConditionallyDeeplyImmutable -> {
                     join(it.conditions.map { i ->
                         when {
                             parameters[i].isStarProjection -> Result.Mutable()
@@ -98,9 +98,9 @@ class Immutability(private val entities: List<Entity>, private vararg val assump
                         }
                     })
                 }
-                is ImmutabilityStatus.Immutable -> Result.Immutable(if (it.isByAssumption()) Result.Reason.ASSUMPTION else Result.Reason.RESOLVED)
-                is ImmutabilityStatus.Mutable -> Result.Mutable(if (it.isByAssumption()) Result.Reason.ASSUMPTION else Result.Reason.RESOLVED)
-                is ImmutabilityStatus.ShallowImmutable -> Result.ShallowImmutable(if (it.isByAssumption()) Result.Reason.ASSUMPTION else Result.Reason.RESOLVED)
+                is ImmutabilityProperty.Immutable -> Result.Immutable(if (it.isByAssumption()) Result.Reason.ASSUMPTION else Result.Reason.RESOLVED)
+                is ImmutabilityProperty.Mutable -> Result.Mutable(if (it.isByAssumption()) Result.Reason.ASSUMPTION else Result.Reason.RESOLVED)
+                is ImmutabilityProperty.ShallowImmutable -> Result.ShallowImmutable(if (it.isByAssumption()) Result.Reason.ASSUMPTION else Result.Reason.RESOLVED)
             }
         } ?: Result.Mutable(Result.Reason.UNKNOWN)
 
@@ -122,7 +122,7 @@ class Immutability(private val entities: List<Entity>, private vararg val assump
 
     }
 
-    private fun checkAssumptions(name: String): ImmutabilityStatus? {
+    private fun checkAssumptions(name: String): ImmutabilityProperty? {
         val t = assumptions.mapNotNull { it.get(name) }
         if (t.isNotEmpty()) {
             return join(t)
@@ -130,16 +130,16 @@ class Immutability(private val entities: List<Entity>, private vararg val assump
         return null
     }
 
-    private fun mapWithAssumptions(descriptor: DeclarationDescriptor): ImmutabilityStatus? =
+    private fun mapWithAssumptions(descriptor: DeclarationDescriptor): ImmutabilityProperty? =
         checkAssumptions(descriptor.fqNameSafe.asString()) ?: map[descriptor]
 
-    fun update(entity: Entity, newValue: ImmutabilityStatus): Boolean =
+    fun update(entity: Entity, newValue: ImmutabilityProperty): Boolean =
         when (entity) {
             is ClassTemplate -> update(entity.desc, newValue)
             ErrorTemplate -> false
         }
 
-    fun update(descriptor: DeclarationDescriptor, newValue: ImmutabilityStatus): Boolean {
+    fun update(descriptor: DeclarationDescriptor, newValue: ImmutabilityProperty): Boolean {
         val oldValue = map[descriptor]
         if (oldValue != null && oldValue hasSameStatus newValue) {
             return false
@@ -152,7 +152,7 @@ class Immutability(private val entities: List<Entity>, private vararg val assump
         it.key.fqNameSafe.asString() + " -> " + it.value.toString()
     }.joinToString(separator = "\n")
 
-    fun results(): List<Pair<Entity, ImmutabilityStatus>> =
+    fun results(): List<Pair<Entity, ImmutabilityProperty>> =
         entities.mapNotNull { entity ->
             when (entity) {
                 is ClassTemplate -> map[entity.desc]?.let { entity to it }
@@ -160,7 +160,7 @@ class Immutability(private val entities: List<Entity>, private vararg val assump
             }
         }
 
-    fun resultsForEntities(): List<Pair<Entity, ImmutabilityStatus?>> =
+    fun resultsForEntities(): List<Pair<Entity, ImmutabilityProperty?>> =
         entities.map { entity ->
             when (entity) {
                 is ClassTemplate -> entity to map[entity.desc]
