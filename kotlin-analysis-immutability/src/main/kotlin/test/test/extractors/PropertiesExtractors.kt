@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.utils.addToStdlib.firstNotNullResult
 import test.test.*
+import test.test.dependencies.*
 
 class PropertiesExtractor(
     private val resolutionFacade: ResolutionFacade?,
@@ -16,7 +17,7 @@ class PropertiesExtractor(
             val properties = psiElement.body?.properties?.map { prop ->
                 prop.resolveToDescriptorIfAny(resolutionFacade)?.let { desc ->
                     priority.firstNotNullResult { it(prop, desc) }
-                } ?: Dependency.Error("Cannot resolve $prop")
+                } ?: Error("Cannot resolve $prop")
             }.orEmpty()
             properties
         } ?: resolveErrorFor(psiElement)
@@ -24,15 +25,15 @@ class PropertiesExtractor(
 
 fun extractBase(property: KtProperty, descriptor: VariableDescriptor): Dependency =
     if (descriptor.isVar) {
-        Dependency.VarProperty.fromDescriptor(descriptor)
+        VarProperty.fromDescriptor(descriptor)
     } else {
-        Dependency.ValProperty.fromDescriptor(descriptor)
+        ValProperty.fromDescriptor(descriptor)
     }
 
 fun extractDelegate(property: KtProperty, descriptor: VariableDescriptor): Dependency? =
     property.delegate?.let {
-        Dependency.DelegatedValProperty.fromDescriptor(descriptor, it)
+        DelegatedValProperty.fromDescriptor(descriptor, it)
     }
 
 fun extractGetter(property: KtProperty, descriptor: VariableDescriptor): Dependency? =
-    property.getter?.let { Dependency.PropertyWithGetter.fromDescriptor(descriptor) }
+    property.getter?.let { PropertyWithGetter.fromDescriptor(descriptor) }

@@ -1,9 +1,10 @@
 package test.test
 
 import com.intellij.openapi.project.Project
+import test.test.dependencies.Error
 
 private fun countErrorDependencies(dependencies: Dependencies) =
-    dependencies.count { it is Dependency.Error }
+    dependencies.count { it is Error }
 
 fun validateEntities(entities: List<Entity>): Boolean {
     val failed = entities.count {

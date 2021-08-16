@@ -5,6 +5,9 @@ import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.psiUtil.isPropertyParameter
 import test.test.*
+import test.test.dependencies.Error
+import test.test.dependencies.ValParameter
+import test.test.dependencies.VarParameter
 
 class ValueParametersExtractor(private val resolutionFacade: ResolutionFacade?) : Extractor<Dependencies> {
     override fun fromClass(psiElement: KtClass): Dependencies =
@@ -16,11 +19,11 @@ class ValueParametersExtractor(private val resolutionFacade: ResolutionFacade?) 
             }.map { parameter ->
                 parameter.resolveToDescriptorIfAny(resolutionFacade)?.let {
                     if (parameter.isMutable) {
-                        Dependency.VarParameter.fromDescriptor(it)
+                        VarParameter.fromDescriptor(it)
                     } else {
-                        Dependency.ValParameter.fromDescriptor(it)
+                        ValParameter.fromDescriptor(it)
                     }
-                } ?: Dependency.Error("Cannot resolve $parameter")
+                } ?: Error("Cannot resolve $parameter")
             }
             parameters
         } ?: resolveErrorFor(psiElement)

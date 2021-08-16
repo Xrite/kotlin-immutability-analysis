@@ -1,5 +1,6 @@
 package test.test.reasons
 
+import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.idea.util.string.collapseSpaces
 
 sealed class Reason {
@@ -32,17 +33,21 @@ sealed class ImmutableReason : Reason() {
 }
 
 sealed class ShallowImmutableReason : Reason() {
-    class ParentTypeShallowImmutable(val byAssumption: Boolean) : ShallowImmutableReason() {
+    class ParentTypeShallowImmutable(val byAssumption: Boolean, val parentType: String) : ShallowImmutableReason() {
         override val csvData = object : CSVData {
             override val reason = "Parent type shallow immutable"
+            override val info: String
+                get() = parentType
         }
     }
-    class OuterClassShallowImmutable(val byAssumption: Boolean) : ShallowImmutableReason() {
+    class OuterClassShallowImmutable(val byAssumption: Boolean, val outerClass: String) : ShallowImmutableReason() {
         override val csvData = object : CSVData {
             override val reason = "Outer class shallow immutable"
+            override val info: String
+                get() = outerClass
         }
     }
-    class ValProperty(val type: Type, val isParameter: Boolean) : ShallowImmutableReason() {
+    class ValProperty(val type: Type, val isParameter: Boolean, val property: String) : ShallowImmutableReason() {
         override val csvData = object : CSVData {
             override val reason: String
                 get() {
@@ -55,6 +60,8 @@ sealed class ShallowImmutableReason : Reason() {
                         Type.SHALLOW_IMMUTABLE -> "val $valType refers to shallow immutable type"
                     }.collapseSpaces()
                 }
+            override val info: String
+                get() = property
         }
     }
 
@@ -113,7 +120,7 @@ sealed class ConditionallyDeeplyImmutableReason : Reason() {
 }
 
 sealed class MutableReason : Reason() {
-    class ParentType(val type: Type) : MutableReason() {
+    class ParentType(val type: Type, val parentType: String) : MutableReason() {
         override val csvData = object : CSVData {
             override val reason: String
                 get() = when (type) {
@@ -121,6 +128,8 @@ sealed class MutableReason : Reason() {
                     Type.UNKNOWN -> "Parent type unknown"
                     Type.MUTABLE -> "Parent type mutable"
                 }
+            override val info: String
+                get() = parentType
         }
         enum class Type {
             MUTABLE_BY_ASSUMPTION,
@@ -128,13 +137,15 @@ sealed class MutableReason : Reason() {
             MUTABLE,
         }
     }
-    class OuterClass(val type: Type) : MutableReason() {
+    class OuterClass(val type: Type, val outerClass: String) : MutableReason() {
         override val csvData = object : CSVData {
             override val reason: String
                 get() = when(type) {
                     Type.MUTABLE_BY_ASSUMPTION -> "Outer class mutable (assumption)"
                     Type.MUTABLE -> "Outer class mutable"
                 }
+            override val info: String
+                get() = outerClass
         }
         enum class Type {
             MUTABLE_BY_ASSUMPTION,
@@ -142,13 +153,15 @@ sealed class MutableReason : Reason() {
         }
     }
 
-    class VarProperty(val isParameter: Boolean) : MutableReason() {
+    class VarProperty(val isParameter: Boolean, val d: String) : MutableReason() {
         override val csvData = object : CSVData {
             override val reason: String
                 get() {
                     val varType = if (isParameter) "(parameter)" else ""
                     return "var $varType".collapseSpaces()
                 }
+            override val info: String
+                get() = d
         }
     }
     object Error : MutableReason() {

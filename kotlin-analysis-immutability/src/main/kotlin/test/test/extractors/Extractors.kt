@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 import org.jetbrains.research.ml.kotlinAnalysis.util.isKotlinRelatedFile
 import test.test.*
+import test.test.dependencies.Error
 
 interface Extractor<R> {
     fun fromClass(psiElement: KtClass): R
@@ -33,7 +34,7 @@ abstract class ClassOrObjectExtractor<R> : Extractor<R> {
 }
 
 fun resolveErrorFor(psiElement: KtElement) =
-    listOf(Dependency.Error("Cannot resolve descriptor for $psiElement"))
+    listOf(Error("Cannot resolve descriptor for $psiElement"))
 
 class MultipleExtractors(private vararg val extractors: Extractor<Dependencies>) : Extractor<Dependencies> {
     override fun fromClass(psiElement: KtClass): Dependencies =
