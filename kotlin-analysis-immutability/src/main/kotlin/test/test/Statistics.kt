@@ -1,7 +1,6 @@
 package test.test
 
 class Statistics(private val immutabilityMap: ImmutabilityMap) {
-    // TODO: Add error percentage to the results
     fun percentage(): String {
         val results = immutabilityMap.results()
         val immutable = results.filter { it.second is ImmutabilityProperty.Immutable }

@@ -169,9 +169,12 @@ sealed class MutableReason : Reason() {
             override val reason = "Error"
         }
     }
-    object DelegatedProperty : MutableReason() {
+
+    class DelegatedProperty(val property: String) : MutableReason() {
         override val csvData = object : CSVData {
             override val reason = "Delegated property"
+            override val info: String
+                get() = property
         }
     }
     object PropertyWithGetter : MutableReason() {

@@ -21,5 +21,5 @@ data class DelegatedValProperty(
     }
 
     override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
-        ImmutabilityProperty.Mutable(MutableReason.DelegatedProperty)
+        ImmutabilityProperty.Mutable(MutableReason.DelegatedProperty(desc.toString()))
 }

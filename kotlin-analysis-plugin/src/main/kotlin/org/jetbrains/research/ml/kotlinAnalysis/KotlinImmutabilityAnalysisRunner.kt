@@ -9,6 +9,16 @@ import org.jetbrains.plugins.gradle.util.GradleConstants
 import test.test.ImmutabilityAnalysisExecutor
 import java.nio.file.Paths
 
+object ImmutabilityArgs : RunnerArgs {
+
+}
+
+object ImmutabilityArgsParser : RunnerArgsParser<ImmutabilityArgs> {
+    override fun parse(args: List<String>): ImmutabilityArgs {
+        TODO("Not yet implemented")
+    }
+}
+
 object KotlinImmutabilityAnalysisRunner : KotlinAnalysisRunner<IORunnerArgs, IORunnerArgsParser>
     ("kotlin-immutability-analysis", IORunnerArgsParser) {
     override fun run(args: IORunnerArgs) {

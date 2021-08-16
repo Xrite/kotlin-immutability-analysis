@@ -1,7 +1,12 @@
 package test.test.extractors
 
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
+import org.jetbrains.kotlin.idea.analysis.computeTypeInContext
+import org.jetbrains.kotlin.idea.caches.resolve.analyze
+import org.jetbrains.kotlin.idea.caches.resolve.getResolutionFacade
+import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
+import org.jetbrains.kotlin.idea.util.getResolutionScope
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.utils.addToStdlib.firstNotNullResult
 import test.test.*
@@ -9,7 +14,7 @@ import test.test.dependencies.*
 
 class PropertiesExtractor(
     private val resolutionFacade: ResolutionFacade?,
-    private vararg val priority: (KtProperty, VariableDescriptor) -> Dependency?
+    private vararg val priority: (KtProperty, VariableDescriptor) -> Dependency?,
 ) :
     ClassOrObjectExtractor<Dependencies>() {
     override fun fromClassOrObject(psiElement: KtClassOrObject): Dependencies =
@@ -33,6 +38,20 @@ fun extractBase(property: KtProperty, descriptor: VariableDescriptor): Dependenc
 fun extractDelegate(property: KtProperty, descriptor: VariableDescriptor): Dependency? =
     property.delegate?.let {
         DelegatedValProperty.fromDescriptor(descriptor, it)
+    }
+
+fun extractLazyDelegate(property: KtProperty, descriptor: VariableDescriptor): Dependency? =
+    property.delegate?.let {
+        val expression = it.expression ?: TODO()
+        val bindingContext = expression.analyze()
+        //val scope = expression.getResolutionScope(bindingContext, expression.getResolutionFacade())
+        val scope = expression.getResolutionScope()
+        val expressionType = expression.computeTypeInContext(scope) ?: return null
+        if (expressionType.fqName?.asString() == "kotlin.Lazy") {
+            LazyValProperty.fromDescriptor(descriptor, it)
+        } else {
+            null
+        }
     }
 
 fun extractGetter(property: KtProperty, descriptor: VariableDescriptor): Dependency? =
