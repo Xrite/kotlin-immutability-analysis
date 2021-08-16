@@ -7,6 +7,10 @@ import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.research.ml.kotlinAnalysis.AnalysisExecutor
 import org.jetbrains.research.ml.kotlinAnalysis.ResourceManager
 import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
+import test.test.assumptions.JavaAssumedImmutableTypes
+import test.test.assumptions.KotlinBasicTypes
+import test.test.assumptions.KotlinCollections
+import test.test.assumptions.KotlinFunctions
 import test.test.extractors.*
 import test.test.output.CSVWriterResourceManager
 import java.nio.file.Path
@@ -70,7 +74,7 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
 
             //println(entities)
             val result =
-                solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections, KotlinFunctions)
+                solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections(false), KotlinFunctions)
             println("ok")
             //println(properties)
             //println(classifiers)
