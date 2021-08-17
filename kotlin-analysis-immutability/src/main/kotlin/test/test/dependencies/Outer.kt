@@ -18,11 +18,10 @@ data class Outer(
         return when (val status = resolve(descriptor.defaultType)) {
             is ImmutabilityMap.Result.ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> OuterClassTypeConditionallyDeeplyImmutable(
+                    ImmutabilityMap.Result.ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> OuterClassTypeConditionallyDeeplyImmutable(
                         true
                     )
-                    ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
-                    ImmutabilityMap.Result.Reason.RESOLVED -> OuterClassTypeConditionallyDeeplyImmutable(
+                    ImmutabilityMap.Result.ConditionallyDeeplyImmutable.Reason.RESOLVED -> OuterClassTypeConditionallyDeeplyImmutable(
                         false
                     )
                 }
@@ -31,12 +30,12 @@ data class Outer(
             is ImmutabilityMap.Result.Immutable -> ImmutabilityProperty.Immutable()
             is ImmutabilityMap.Result.Mutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> OuterClassMutable(
+                    ImmutabilityMap.Result.Mutable.Reason.ASSUMPTION -> OuterClassMutable(
                         OuterClassMutable.Type.MUTABLE_BY_ASSUMPTION,
                         outer
                     )
-                    ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("Outer class unknown")
-                    ImmutabilityMap.Result.Reason.RESOLVED -> OuterClassMutable(
+                    ImmutabilityMap.Result.Mutable.Reason.UNKNOWN -> throw IllegalArgumentException("Outer class unknown")
+                    ImmutabilityMap.Result.Mutable.Reason.RESOLVED -> OuterClassMutable(
                         OuterClassMutable.Type.MUTABLE,
                         outer
                     )
@@ -45,12 +44,11 @@ data class Outer(
             }
             is ImmutabilityMap.Result.ShallowImmutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> OuterClassShallowImmutable(
+                    ImmutabilityMap.Result.ShallowImmutable.Reason.ASSUMPTION -> OuterClassShallowImmutable(
                         true,
                         outer
                     )
-                    ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
-                    ImmutabilityMap.Result.Reason.RESOLVED -> OuterClassShallowImmutable(
+                    ImmutabilityMap.Result.ShallowImmutable.Reason.RESOLVED -> OuterClassShallowImmutable(
                         false,
                         outer
                     )

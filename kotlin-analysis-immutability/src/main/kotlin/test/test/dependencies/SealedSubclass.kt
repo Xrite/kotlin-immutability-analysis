@@ -23,10 +23,9 @@ class SealedSubclass(
         return when (val result = resolve(type)) {
             is ImmutabilityMap.Result.ConditionallyDeeplyImmutable -> {
                 val reason = when (result.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> SealedSubclassConditionallyDeeplyImmutable(
+                    ImmutabilityMap.Result.ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> SealedSubclassConditionallyDeeplyImmutable(
                         SealedSubclassConditionallyDeeplyImmutable.Type.CONDITIONALLY_DEEPLY_IMMUTABLE_BY_ASSUMPTION, descriptor.toString())
-                    ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("con")
-                    ImmutabilityMap.Result.Reason.RESOLVED -> SealedSubclassConditionallyDeeplyImmutable(
+                    ImmutabilityMap.Result.ConditionallyDeeplyImmutable.Reason.RESOLVED -> SealedSubclassConditionallyDeeplyImmutable(
                         SealedSubclassConditionallyDeeplyImmutable.Type.CONDITIONALLY_DEEPLY_IMMUTABLE, descriptor.toString())
                 }
                 return ImmutabilityProperty.ConditionallyDeeplyImmutable(result.conditions, reason)
@@ -34,18 +33,17 @@ class SealedSubclass(
             is ImmutabilityMap.Result.Immutable -> ImmutabilityProperty.Immutable()
             is ImmutabilityMap.Result.Mutable -> {
                 val reason = when (result.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> SealedSubclassMutable(SealedSubclassMutable.Type.MUTABLE_BY_ASSUMPTION, descriptor.toString())
-                    ImmutabilityMap.Result.Reason.UNKNOWN -> SealedSubclassMutable(SealedSubclassMutable.Type.UNKNOWN, descriptor.toString())
-                    ImmutabilityMap.Result.Reason.RESOLVED -> SealedSubclassMutable(SealedSubclassMutable.Type.MUTABLE, descriptor.toString())
+                    ImmutabilityMap.Result.Mutable.Reason.ASSUMPTION -> SealedSubclassMutable(SealedSubclassMutable.Type.MUTABLE_BY_ASSUMPTION, descriptor.toString())
+                    ImmutabilityMap.Result.Mutable.Reason.UNKNOWN -> SealedSubclassMutable(SealedSubclassMutable.Type.UNKNOWN, descriptor.toString())
+                    ImmutabilityMap.Result.Mutable.Reason.RESOLVED -> SealedSubclassMutable(SealedSubclassMutable.Type.MUTABLE, descriptor.toString())
                 }
                 return ImmutabilityProperty.Mutable(reason)
             }
             is ImmutabilityMap.Result.ShallowImmutable -> {
                 val reason = when (result.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> SealedSubclassShallowImmutable(
+                    ImmutabilityMap.Result.ShallowImmutable.Reason.ASSUMPTION -> SealedSubclassShallowImmutable(
                         SealedSubclassShallowImmutable.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION, descriptor.toString())
-                    ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("Shallow immutable subclass unknown")
-                    ImmutabilityMap.Result.Reason.RESOLVED -> SealedSubclassShallowImmutable(
+                    ImmutabilityMap.Result.ShallowImmutable.Reason.RESOLVED -> SealedSubclassShallowImmutable(
                         SealedSubclassShallowImmutable.Type.SHALLOW_IMMUTABLE, descriptor.toString())
                 }
                 return ImmutabilityProperty.ShallowImmutable(reason)

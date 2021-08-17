@@ -13,35 +13,47 @@ import test.test.reasons.MutableReason
 import kotlin.IllegalArgumentException
 
 class ImmutabilityMap(private val entities: List<Entity>, private vararg val assumptions: Assumptions) {
-    sealed class Result(val reason: Reason) {
-        class Immutable(reason: Reason = Reason.RESOLVED) : Result(reason) {
+    sealed class Result {
+        class Immutable(val reason: Reason = Reason.RESOLVED) : Result() {
             override fun toString(): String {
                 return "Immutable"
             }
+            enum class Reason {
+                ASSUMPTION,
+                RESOLVED
+            }
         }
 
-        class ShallowImmutable(reason: Reason = Reason.RESOLVED) : Result(reason) {
+        class ShallowImmutable(val reason: Reason = Reason.RESOLVED) : Result() {
             override fun toString(): String {
                 return "ShallowImmutable"
             }
-        }
-
-        class ConditionallyDeeplyImmutable(val conditions: Set<Int>, reason: Reason = Reason.RESOLVED) :
-            Result(reason) {
-            constructor(condition: Int, reason: Reason = Reason.RESOLVED) : this(setOf(condition), reason)
-        }
-
-        class Mutable(reason: Reason = Reason.RESOLVED) : Result(reason) {
-            override fun toString(): String {
-                return "Mutable"
+            enum class Reason {
+                ASSUMPTION,
+                RESOLVED
             }
         }
 
-        enum class Reason {
-            ASSUMPTION,
-            UNKNOWN,
-            RESOLVED
+        class ConditionallyDeeplyImmutable(val conditions: Set<Int>, val reason: Reason = Reason.RESOLVED) :
+            Result() {
+            constructor(condition: Int, reason: Reason = Reason.RESOLVED) : this(setOf(condition), reason)
+            enum class Reason {
+                ASSUMPTION,
+                RESOLVED
+            }
         }
+
+        class Mutable(val reason: Reason = Reason.RESOLVED) : Result() {
+            override fun toString(): String {
+                return "Mutable"
+            }
+            enum class Reason {
+                ASSUMPTION,
+                UNKNOWN,
+                RESOLVED
+            }
+        }
+
     }
 
 
@@ -100,11 +112,11 @@ class ImmutabilityMap(private val entities: List<Entity>, private vararg val ass
                         }
                     })
                 }
-                is ImmutabilityProperty.Immutable -> Result.Immutable(if (it.isByAssumption()) Result.Reason.ASSUMPTION else Result.Reason.RESOLVED)
-                is ImmutabilityProperty.Mutable -> Result.Mutable(if (it.isByAssumption()) Result.Reason.ASSUMPTION else Result.Reason.RESOLVED)
-                is ImmutabilityProperty.ShallowImmutable -> Result.ShallowImmutable(if (it.isByAssumption()) Result.Reason.ASSUMPTION else Result.Reason.RESOLVED)
+                is ImmutabilityProperty.Immutable -> Result.Immutable(if (it.isByAssumption()) Result.Immutable.Reason.ASSUMPTION else Result.Immutable.Reason.RESOLVED)
+                is ImmutabilityProperty.Mutable -> Result.Mutable(if (it.isByAssumption()) Result.Mutable.Reason.ASSUMPTION else Result.Mutable.Reason.RESOLVED)
+                is ImmutabilityProperty.ShallowImmutable -> Result.ShallowImmutable(if (it.isByAssumption()) Result.ShallowImmutable.Reason.ASSUMPTION else Result.ShallowImmutable.Reason.RESOLVED)
             }
-        } ?: Result.Mutable(Result.Reason.UNKNOWN)
+        } ?: Result.Mutable(Result.Mutable.Reason.UNKNOWN)
 
         operator fun invoke(
             type: KotlinType
@@ -120,7 +132,7 @@ class ImmutabilityMap(private val entities: List<Entity>, private vararg val ass
                 null
             }
                 ?: type.constructor.declarationDescriptor?.let { invoke(it, type.arguments) }
-                ?: Result.Mutable(Result.Reason.UNKNOWN)
+                ?: Result.Mutable(Result.Mutable.Reason.UNKNOWN)
 
     }
 

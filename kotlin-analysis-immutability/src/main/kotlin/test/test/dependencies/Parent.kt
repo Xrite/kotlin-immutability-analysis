@@ -26,11 +26,10 @@ data class Parent(
         return when (val status = resolve(type)) {
             is ImmutabilityMap.Result.ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> ParentTypeConditionallyDeeplyImmutable(
+                    ImmutabilityMap.Result.ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ParentTypeConditionallyDeeplyImmutable(
                         true
                     )
-                    ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
-                    ImmutabilityMap.Result.Reason.RESOLVED -> ParentTypeConditionallyDeeplyImmutable(
+                    ImmutabilityMap.Result.ConditionallyDeeplyImmutable.Reason.RESOLVED -> ParentTypeConditionallyDeeplyImmutable(
                         false
                     )
                 }
@@ -39,15 +38,15 @@ data class Parent(
             is ImmutabilityMap.Result.Immutable -> ImmutabilityProperty.Immutable()
             is ImmutabilityMap.Result.Mutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> ParentTypeMutable(
+                    ImmutabilityMap.Result.Mutable.Reason.ASSUMPTION -> ParentTypeMutable(
                         ParentTypeMutable.Type.MUTABLE_BY_ASSUMPTION,
                         parent
                     )
-                    ImmutabilityMap.Result.Reason.UNKNOWN -> ParentTypeMutable(
+                    ImmutabilityMap.Result.Mutable.Reason.UNKNOWN -> ParentTypeMutable(
                         ParentTypeMutable.Type.UNKNOWN,
                         parent
                     )
-                    ImmutabilityMap.Result.Reason.RESOLVED -> ParentTypeMutable(
+                    ImmutabilityMap.Result.Mutable.Reason.RESOLVED -> ParentTypeMutable(
                         ParentTypeMutable.Type.MUTABLE,
                         parent
                     )
@@ -56,12 +55,11 @@ data class Parent(
             }
             is ImmutabilityMap.Result.ShallowImmutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> ParentTypeShallowImmutable(
+                    ImmutabilityMap.Result.ShallowImmutable.Reason.ASSUMPTION -> ParentTypeShallowImmutable(
                         true,
                         parent
                     )
-                    ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
-                    ImmutabilityMap.Result.Reason.RESOLVED -> ParentTypeShallowImmutable(
+                    ImmutabilityMap.Result.ShallowImmutable.Reason.RESOLVED -> ParentTypeShallowImmutable(
                         false,
                         parent
                     )
