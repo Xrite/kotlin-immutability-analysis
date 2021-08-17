@@ -56,7 +56,7 @@ class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
 
 
         val extractor = MultipleExtractors(
-            PropertiesExtractor(rf, ::extractDelegate, ::extractGetter, ::extractBase),
+            PropertiesExtractor(rf, ::extractLazyDelegate, ::extractDelegate, ::extractGetter, ::extractBase),
             ValueParametersExtractor(rf),
             ParentsExtractor(rf),
             OuterClassesExtractor(rf)

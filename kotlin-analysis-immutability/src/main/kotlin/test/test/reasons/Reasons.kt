@@ -1,6 +1,5 @@
 package test.test.reasons
 
-import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.idea.util.string.collapseSpaces
 
 sealed class Reason {
@@ -63,6 +62,30 @@ sealed class ShallowImmutableReason : Reason() {
             override val info: String
                 get() = property
         }
+
+        enum class Type {
+            MUTABLE_BY_ASSUMPTION,
+            SHALLOW_IMMUTABLE_BY_ASSUMPTION,
+            UNKNOWN,
+            MUTABLE,
+            SHALLOW_IMMUTABLE
+        }
+    }
+
+    class SealedSubclassShallowImmutable(val type: Type, val name: String) : ShallowImmutableReason() {
+        override val csvData = object : CSVData {
+            override val reason: String
+                get() = when(type) {
+                    Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION -> "sealed subclass shallow immutable (assumption)"
+                    Type.SHALLOW_IMMUTABLE-> "sealed subclass shallow immutable"
+                }
+            override val info: String
+                get() = name
+        }
+        enum class Type {
+            SHALLOW_IMMUTABLE_BY_ASSUMPTION,
+            SHALLOW_IMMUTABLE,
+        }
     }
 
     object ByAssumption : ShallowImmutableReason() {
@@ -72,13 +95,6 @@ sealed class ShallowImmutableReason : Reason() {
         }
     }
 
-    enum class Type {
-        MUTABLE_BY_ASSUMPTION,
-        SHALLOW_IMMUTABLE_BY_ASSUMPTION,
-        UNKNOWN,
-        MUTABLE,
-        SHALLOW_IMMUTABLE
-    }
 }
 
 sealed class ConditionallyDeeplyImmutableReason : Reason() {
@@ -111,6 +127,22 @@ sealed class ConditionallyDeeplyImmutableReason : Reason() {
                     val assumption = if (byAssumption) "(assumption)" else ""
                     return "val $valType refers to conditionally deeply immutable type $assumption".collapseSpaces()
                 }
+        }
+    }
+
+    class SealedSubclassConditionallyDeeplyImmutable(val type: Type, val name: String) : ConditionallyDeeplyImmutableReason() {
+        override val csvData = object : CSVData {
+            override val reason: String
+                get() = when(type) {
+                    Type.CONDITIONALLY_DEEPLY_IMMUTABLE_BY_ASSUMPTION -> "sealed subclass conditionally deeply immutable (assumption)"
+                    Type.CONDITIONALLY_DEEPLY_IMMUTABLE-> "sealed subclass conditionally deeply immutable"
+                }
+            override val info: String
+                get() = name
+        }
+        enum class Type {
+            CONDITIONALLY_DEEPLY_IMMUTABLE_BY_ASSUMPTION,
+            CONDITIONALLY_DEEPLY_IMMUTABLE,
         }
     }
 
@@ -153,7 +185,7 @@ sealed class MutableReason : Reason() {
         }
     }
 
-    class VarProperty(val isParameter: Boolean, val d: String) : MutableReason() {
+    class VarProperty(val isParameter: Boolean, val name: String) : MutableReason() {
         override val csvData = object : CSVData {
             override val reason: String
                 get() {
@@ -161,9 +193,37 @@ sealed class MutableReason : Reason() {
                     return "var $varType".collapseSpaces()
                 }
             override val info: String
-                get() = d
+                get() = name
         }
     }
+
+    class OpenProperty(val name: String) : MutableReason() {
+        override val csvData = object : CSVData {
+            override val reason: String
+                get() = "open property"
+            override val info: String
+                get() = name
+        }
+    }
+
+    class SealedSubclassMutable(val type: Type, val name: String) : MutableReason() {
+        override val csvData = object : CSVData {
+            override val reason: String
+                get() = when(type) {
+                    Type.MUTABLE_BY_ASSUMPTION -> "sealed subclass mutable (assumption)"
+                    Type.UNKNOWN -> "sealed subclass unknown"
+                    Type.MUTABLE -> "sealed subclass mutable"
+                }
+            override val info: String
+                get() = name
+        }
+        enum class Type {
+            MUTABLE_BY_ASSUMPTION,
+            UNKNOWN,
+            MUTABLE,
+        }
+    }
+
     object Error : MutableReason() {
         override val csvData = object : CSVData {
             override val reason = "Error"

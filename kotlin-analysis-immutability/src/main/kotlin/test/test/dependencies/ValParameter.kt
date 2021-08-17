@@ -40,17 +40,17 @@ data class ValParameter(
             is ImmutabilityMap.Result.Mutable -> {
                 val reason = when (status.reason) {
                     ImmutabilityMap.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
-                        ShallowImmutableReason.Type.MUTABLE_BY_ASSUMPTION,
+                        ShallowImmutableReason.ValProperty.Type.MUTABLE_BY_ASSUMPTION,
                         true,
                         parameter
                     )
                     ImmutabilityMap.Result.Reason.UNKNOWN -> ShallowImmutableReason.ValProperty(
-                        ShallowImmutableReason.Type.UNKNOWN,
+                        ShallowImmutableReason.ValProperty.Type.UNKNOWN,
                         true,
                         parameter
                     )
                     ImmutabilityMap.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
-                        ShallowImmutableReason.Type.MUTABLE,
+                        ShallowImmutableReason.ValProperty.Type.MUTABLE,
                         true,
                         parameter
                     )
@@ -60,13 +60,13 @@ data class ValParameter(
             is ImmutabilityMap.Result.ShallowImmutable -> {
                 val reason = when (status.reason) {
                     ImmutabilityMap.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
-                        ShallowImmutableReason.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION,
+                        ShallowImmutableReason.ValProperty.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION,
                         true,
                         parameter
                     )
                     ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
                     ImmutabilityMap.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
-                        ShallowImmutableReason.Type.SHALLOW_IMMUTABLE,
+                        ShallowImmutableReason.ValProperty.Type.SHALLOW_IMMUTABLE,
                         true,
                         parameter
                     )
