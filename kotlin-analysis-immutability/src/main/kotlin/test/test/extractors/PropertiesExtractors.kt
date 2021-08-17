@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.utils.addToStdlib.firstNotNullResult
 import test.test.*
 import test.test.dependencies.*
 
+
 class PropertiesExtractor(
     private val resolutionFacade: ResolutionFacade?,
     private vararg val priority: (KtProperty, VariableDescriptor) -> Dependency?,
@@ -26,7 +27,10 @@ class PropertiesExtractor(
             }.orEmpty()
             properties
         } ?: resolveErrorFor(psiElement)
+
 }
+
+typealias F = (KtProperty, VariableDescriptor) -> Dependency?
 
 fun extractBase(property: KtProperty, descriptor: VariableDescriptor): Dependency =
     if (descriptor.isVar) {

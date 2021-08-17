@@ -36,12 +36,13 @@ abstract class ClassOrObjectExtractor<R> : Extractor<R> {
 fun resolveErrorFor(psiElement: KtElement) =
     listOf(Error("Cannot resolve descriptor for $psiElement"))
 
-class MultipleExtractors(private vararg val extractors: Extractor<Dependencies>) : Extractor<Dependencies> {
+class MultipleExtractors(private val extractors: Collection<Extractor<Dependencies>>) : Extractor<Dependencies> {
     override fun fromClass(psiElement: KtClass): Dependencies =
         extractors.flatMap { it.fromClass(psiElement) }
 
     override fun fromObject(psiElement: KtObjectDeclaration): Dependencies =
         extractors.flatMap { it.fromObject(psiElement) }
+    constructor(vararg extractors: Extractor<Dependencies>) : this(extractors.toList())
 }
 
 class Packer(private val resolutionFacade: ResolutionFacade?) {
