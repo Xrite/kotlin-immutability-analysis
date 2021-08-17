@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
 import test.test.ImmutabilityMap
 import test.test.ImmutabilityProperty
-import test.test.reasons.MutableReason
+import test.test.reasons.mutable.DelegatedProperty
 
 data class DelegatedValProperty(
     val desc: VariableDescriptor,
@@ -21,5 +21,5 @@ data class DelegatedValProperty(
     }
 
     override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
-        ImmutabilityProperty.Mutable(MutableReason.DelegatedProperty(desc.toString()))
+        ImmutabilityProperty.Mutable(DelegatedProperty(desc.toString()))
 }

@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
 import test.test.ImmutabilityMap
 import test.test.ImmutabilityProperty
-import test.test.reasons.MutableReason
+import test.test.reasons.mutable.VarProperty
 
 data class VarParameter(
     val desc: ValueParameterDescriptor,
@@ -19,5 +19,5 @@ data class VarParameter(
     }
 
     override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
-        ImmutabilityProperty.Mutable(MutableReason.VarProperty(true, desc.toString()))
+        ImmutabilityProperty.Mutable(VarProperty(true, desc.toString()))
 }

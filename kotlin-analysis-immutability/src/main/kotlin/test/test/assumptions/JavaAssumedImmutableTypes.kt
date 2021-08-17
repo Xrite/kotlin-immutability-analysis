@@ -2,7 +2,7 @@ package test.test.assumptions
 
 import test.test.Assumptions
 import test.test.ImmutabilityProperty
-import test.test.reasons.ImmutableReason
+import test.test.reasons.immutable.ImmutableByAssumption
 
 object JavaAssumedImmutableTypes : Assumptions {
     val types = setOf(
@@ -29,7 +29,7 @@ object JavaAssumedImmutableTypes : Assumptions {
     )
 
     override fun get(name: String): ImmutabilityProperty? = if (name in types) {
-        ImmutabilityProperty.Immutable(ImmutableReason.ByAssumption)
+        ImmutabilityProperty.Immutable(ImmutableByAssumption)
     } else {
         null
     }

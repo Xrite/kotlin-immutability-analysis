@@ -2,8 +2,7 @@ package test.test.assumptions
 
 import test.test.Assumptions
 import test.test.ImmutabilityProperty
-import test.test.reasons.ConditionallyDeeplyImmutableReason
-import test.test.reasons.MutableReason
+import test.test.reasons.conditionally_deeply_immutable.ConditionallyDeeplyImmutableByAssumption
 
 class KotlinCollections(treatCollectionsAsMutable: Boolean) : Assumptions {
     val types = listOf(
@@ -12,7 +11,7 @@ class KotlinCollections(treatCollectionsAsMutable: Boolean) : Assumptions {
         "kotlin.collections.MutableList",
         "kotlin.collections.MutableSet",
         "kotlin.collections.MutableMap"
-    ).associateWith { ImmutabilityProperty.Mutable(MutableReason.ByAssumption) } +
+    ).associateWith { ImmutabilityProperty.Mutable(test.test.reasons.mutable.MutableByAssumption) } +
             if (treatCollectionsAsMutable) {
                 listOf(
                     "kotlin.collections.Iterable",
@@ -20,16 +19,16 @@ class KotlinCollections(treatCollectionsAsMutable: Boolean) : Assumptions {
                     "kotlin.collections.List",
                     "kotlin.collections.Set",
                     "kotlin.collections.Map",
-                ).associateWith { ImmutabilityProperty.Mutable(MutableReason.ByAssumption) }
+                ).associateWith { ImmutabilityProperty.Mutable(test.test.reasons.mutable.MutableByAssumption) }
             } else {
                 mapOf(
                     "kotlin.collections.Iterable" to ImmutabilityProperty.ConditionallyDeeplyImmutable(
                         setOf(0),
-                        ConditionallyDeeplyImmutableReason.ByAssumption
+                        ConditionallyDeeplyImmutableByAssumption
                     ),
                     "kotlin.collections.Collection" to ImmutabilityProperty.ConditionallyDeeplyImmutable(
                         setOf(0),
-                        ConditionallyDeeplyImmutableReason.ByAssumption
+                        ConditionallyDeeplyImmutableByAssumption
                     ),
                     "kotlin.collections.List" to ImmutabilityProperty.ConditionallyDeeplyImmutable(setOf(0)),
                     "kotlin.collections.Set" to ImmutabilityProperty.ConditionallyDeeplyImmutable(setOf(0)),

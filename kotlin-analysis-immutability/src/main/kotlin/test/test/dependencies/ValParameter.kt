@@ -5,8 +5,8 @@ import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
 import test.test.ImmutabilityMap
 import test.test.ImmutabilityProperty
-import test.test.reasons.ConditionallyDeeplyImmutableReason
-import test.test.reasons.ShallowImmutableReason
+import test.test.reasons.shallow_immutable.ValPropertyShallowImmutable
+import test.test.reasons.conditionally_deeply_immutable.ValPropertyConditionallyDeeplyImmutable
 
 data class ValParameter(
     val desc: ValueParameterDescriptor,
@@ -24,12 +24,12 @@ data class ValParameter(
         return when (val status = resolve(type)) {
             is ImmutabilityMap.Result.ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> ConditionallyDeeplyImmutableReason.ValPropertyConditionallyDeeplyImmutable(
+                    ImmutabilityMap.Result.Reason.ASSUMPTION -> ValPropertyConditionallyDeeplyImmutable(
                         byAssumption = true,
                         isParameter = true
                     )
                     ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ConditionallyDeeplyImmutable unknown")
-                    ImmutabilityMap.Result.Reason.RESOLVED -> ConditionallyDeeplyImmutableReason.ValPropertyConditionallyDeeplyImmutable(
+                    ImmutabilityMap.Result.Reason.RESOLVED -> ValPropertyConditionallyDeeplyImmutable(
                         byAssumption = false,
                         isParameter = true
                     )
@@ -39,18 +39,18 @@ data class ValParameter(
             is ImmutabilityMap.Result.Immutable -> ImmutabilityProperty.Immutable()
             is ImmutabilityMap.Result.Mutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
-                        ShallowImmutableReason.ValProperty.Type.MUTABLE_BY_ASSUMPTION,
+                    ImmutabilityMap.Result.Reason.ASSUMPTION -> ValPropertyShallowImmutable(
+                        ValPropertyShallowImmutable.Type.MUTABLE_BY_ASSUMPTION,
                         true,
                         parameter
                     )
-                    ImmutabilityMap.Result.Reason.UNKNOWN -> ShallowImmutableReason.ValProperty(
-                        ShallowImmutableReason.ValProperty.Type.UNKNOWN,
+                    ImmutabilityMap.Result.Reason.UNKNOWN -> ValPropertyShallowImmutable(
+                        ValPropertyShallowImmutable.Type.UNKNOWN,
                         true,
                         parameter
                     )
-                    ImmutabilityMap.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
-                        ShallowImmutableReason.ValProperty.Type.MUTABLE,
+                    ImmutabilityMap.Result.Reason.RESOLVED -> ValPropertyShallowImmutable(
+                        ValPropertyShallowImmutable.Type.MUTABLE,
                         true,
                         parameter
                     )
@@ -59,14 +59,14 @@ data class ValParameter(
             }
             is ImmutabilityMap.Result.ShallowImmutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Reason.ASSUMPTION -> ShallowImmutableReason.ValProperty(
-                        ShallowImmutableReason.ValProperty.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION,
+                    ImmutabilityMap.Result.Reason.ASSUMPTION -> ValPropertyShallowImmutable(
+                        ValPropertyShallowImmutable.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION,
                         true,
                         parameter
                     )
                     ImmutabilityMap.Result.Reason.UNKNOWN -> throw IllegalArgumentException("ShallowImmutable unknown")
-                    ImmutabilityMap.Result.Reason.RESOLVED -> ShallowImmutableReason.ValProperty(
-                        ShallowImmutableReason.ValProperty.Type.SHALLOW_IMMUTABLE,
+                    ImmutabilityMap.Result.Reason.RESOLVED -> ValPropertyShallowImmutable(
+                        ValPropertyShallowImmutable.Type.SHALLOW_IMMUTABLE,
                         true,
                         parameter
                     )
