@@ -50,12 +50,13 @@ class ImmutabilityAnalysisExecutor(
             val extractor = MultipleExtractors(ex)
 
             val time = measureTime {
+                println("Output: ${configuration.outputFileName}")
                 print("Extracting entities...")
                 val (entities, type) = makeEntities(rf, project, extractor, configuration.includeTests)
                 println("done")
 
                 if (!validateEntities(entities)) {
-                    println("failed to validate project")
+                    println("Failed to validate project")
                     return
                 }
 
@@ -68,7 +69,6 @@ class ImmutabilityAnalysisExecutor(
                         KotlinCollections(configuration.treatCollectionsAsMutable),
                         KotlinFunctions
                     )
-                println("ok")
                 //println(properties)
                 //println(classifiers)
                 val stats = Statistics(result)
@@ -76,6 +76,7 @@ class ImmutabilityAnalysisExecutor(
                 dataWriter.addResult(project.name, type, result)
             }
             println("Analysis done in $time")
+            println()
         }
 
         /*

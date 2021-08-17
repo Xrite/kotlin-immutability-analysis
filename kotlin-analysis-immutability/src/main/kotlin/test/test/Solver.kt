@@ -14,7 +14,7 @@ fun solve(entities: List<Entity>, vararg assumptions: Assumptions): Immutability
     val immutability = ImmutabilityMap(entities, *assumptions)
     var iter = 0
     while (true) {
-        println(iter)
+        iter++
         var updated = false
         entities.shuffled().forEach { entity ->
             val newStatus = when (entity) {
@@ -28,7 +28,7 @@ fun solve(entities: List<Entity>, vararg assumptions: Assumptions): Immutability
         if (!updated) {
             break
         }
-        iter++
     }
+    println("Converged in $iter iterations")
     return immutability
 }
