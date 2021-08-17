@@ -1,12 +1,9 @@
 package test.test
 
 import com.intellij.openapi.project.Project
-import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
-import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.research.ml.kotlinAnalysis.AnalysisExecutor
 import org.jetbrains.research.ml.kotlinAnalysis.ResourceManager
-import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
 import test.test.assumptions.JavaAssumedImmutableTypes
 import test.test.assumptions.KotlinBasicTypes
 import test.test.assumptions.KotlinCollections
@@ -17,72 +14,77 @@ import java.nio.file.Path
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
-class ImmutabilityAnalysisExecutor(outputDir: Path) : AnalysisExecutor() {
-    private val dataWriter = CSVWriterResourceManager(outputDir, "results_tests.csv")
-    override val controlledResourceManagers: Set<ResourceManager> = setOf(dataWriter)
+class ImmutabilityAnalysisExecutor(
+    outputDir: Path,
+    configurations: Collection<Configuration> = listOf(
+        Configuration()
+    )
+) : AnalysisExecutor() {
+    private val withWriter = configurations.map { it to CSVWriterResourceManager(outputDir, it.outputFileName) }
+    override val controlledResourceManagers: Set<ResourceManager> = withWriter.map { it.second }.toSet()
 
     @OptIn(ExperimentalTime::class)
     override fun analyse(project: Project) {
         val rf: ResolutionFacade? = null
+
+        withWriter.forEach { (configuration, dataWriter) ->
+            val ex = mutableListOf<Extractor<Dependencies>>()
+            if (configuration.analyzeSealedSubclasses) {
+                ex.add(SealedSubclassesExtractor(rf))
+            }
+            if (configuration.assumeNastyInheritors) {
+                ex.add(UnknownSubclassExtractor(rf))
+            }
+            val fs = mutableListOf<F>()
+            if (configuration.treatLazyAsImmutable) {
+                fs.add(::extractLazyDelegate)
+            }
+            fs.add(::extractDelegate)
+            if (!configuration.assumeGoodGetters) {
+                fs.add(::extractGetter)
+            }
+            fs.add(::extractBase)
+            ex.add(ValueParametersExtractor(rf))
+            ex.add(ParentsExtractor(rf))
+            ex.add(OuterClassesExtractor(rf))
+            val extractor = MultipleExtractors(ex)
+
+            val time = measureTime {
+                print("Extracting entities...")
+                val (entities, type) = makeEntities(rf, project, extractor, configuration.includeTests)
+                println("done")
+
+                if (!validateEntities(entities)) {
+                    println("failed to validate project")
+                    return
+                }
+
+                //println(entities)
+                val result =
+                    solve(
+                        entities,
+                        KotlinBasicTypes,
+                        JavaAssumedImmutableTypes,
+                        KotlinCollections(configuration.treatCollectionsAsMutable),
+                        KotlinFunctions
+                    )
+                println("ok")
+                //println(properties)
+                //println(classifiers)
+                val stats = Statistics(result)
+                println(stats.percentage())
+                dataWriter.addResult(project.name, type, result)
+            }
+            println("Analysis done in $time")
+        }
+
         /*
-        val properties = PsiProvider.extractElementsOfTypeFromProject(project, KtProperty::class.java).forEach {
-            val desc = it.resolveToDescriptorIfAny()
-            println(desc)
-        }
-
-        PsiProvider.extractElementsOfTypeFromProject(project, KtClass::class.java).forEach {
-            val desc = it.resolveToDescriptorIfAny()
-            //println(desc to it)
-        }
-         */
-
-
-        /*
-        val objects = PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).forEach() {
-            val desc = it.resolveToDescriptorIfAny()
-            println(desc to desc?.typeConstructor?.parameters)
-        }
-         */
-
-        //ProjectRootManager.getInstance(project).contentRoots.forEach {
-        //    println(it)
-        //}
-
-
-        PsiProvider.extractElementsOfTypeFromProject(project, KtObjectDeclaration::class.java).forEach {
-            val desc = it.resolveToDescriptorIfAny()
-           // println(desc to it.fqName)
-        }
-
-
         val extractor = MultipleExtractors(
             PropertiesExtractor(rf, ::extractLazyDelegate, ::extractDelegate, ::extractGetter, ::extractBase),
             ValueParametersExtractor(rf),
             ParentsExtractor(rf),
             OuterClassesExtractor(rf)
         )
-
-        val time = measureTime {
-            print("Extracting entities...")
-            val (entities, type) = makeEntities(rf, project, extractor, false)
-            println("done")
-
-            if (!validateEntities(entities)) {
-                println("failed to validate project")
-                return
-            }
-
-            //println(entities)
-            val result =
-                solve(entities, KotlinBasicTypes, JavaAssumedImmutableTypes, KotlinCollections(false), KotlinFunctions)
-            println("ok")
-            //println(properties)
-            //println(classifiers)
-            val stats = Statistics(result)
-            println(stats.percentage())
-            dataWriter.addResult(project.name, type, result)
-        }
-        println("Analysis done in $time")
-        //pp(entities)
+         */
     }
 }
