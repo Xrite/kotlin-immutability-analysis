@@ -70,7 +70,8 @@ class Packer(private val resolutionFacade: ResolutionFacade?) {
                 ktObjectDeclaration.isObjectLiteral() -> ClassType.ANONYMOUS_OBJECT
                 else -> ClassType.OBJECT
             }
-            ClassTemplate(it, type, deps)
+
+            ClassTemplate(it, type, deps, it.typeConstructor.parameters)
         } ?: ErrorTemplate
     }
 }

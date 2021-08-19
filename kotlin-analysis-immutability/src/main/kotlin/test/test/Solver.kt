@@ -1,11 +1,19 @@
 package test.test
 
+import org.jetbrains.kotlin.load.kotlin.toSourceElement
+
 private fun ClassTemplate.calcStatus(
     immutabilityMap: ImmutabilityMap
 ): ImmutabilityProperty {
     val resolve = immutabilityMap.Resolver(this.parameters)
     val neighbors = this.dependencies.map { dependency ->
-        dependency.recalculate { resolve(it) }
+        dependency.recalculate {
+            try {
+                resolve(it)
+            } catch (e: IllegalArgumentException) {
+                throw IllegalArgumentException("Failed to resolve type $it in ${this.desc.toSourceElement.containingFile}", e)
+            }
+        }
     }
     return join(neighbors)
 }

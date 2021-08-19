@@ -3,6 +3,7 @@ package test.test
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.descriptors.TypeParameterDescriptor
+import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.TypeProjection
@@ -78,7 +79,7 @@ class ImmutabilityMap(private val entities: List<Entity>, private vararg val ass
         }
     }.associateWith { ImmutabilityProperty.Immutable() }.toMutableMap()
 
-    inner class Resolver(context: List<TypeParameterDescriptor>) {
+    inner class Resolver(private val context: List<TypeParameterDescriptor>) {
         private val indices = context.associate { it.original.typeConstructor to it.index }
 
         private fun index(projection: TypeProjection) = indices[projection.type.constructor]
@@ -98,7 +99,7 @@ class ImmutabilityMap(private val entities: List<Entity>, private vararg val ass
                                 if (idx != null) {
                                     Result.ConditionallyDeeplyImmutable(idx)
                                 } else {
-                                    throw IllegalArgumentException("Can't get index of ${parameters[i]}")
+                                    throw IllegalArgumentException("Can't get index of ${parameters[i]} in ${descriptor.defaultType} with context $context") //TODO: fix (/Users/Anton.Bukov/work/dataset/InsertKoinIO#koin, /Users/Anton.Bukov/work/dataset/corda#corda)
                                 }
                             }
                             else -> {
@@ -131,7 +132,13 @@ class ImmutabilityMap(private val entities: List<Entity>, private vararg val ass
             } else {
                 null
             }
-                ?: type.constructor.declarationDescriptor?.let { invoke(it, type.arguments) }
+                ?: type.constructor.declarationDescriptor?.let {
+                    try {
+                        invoke(it, type.arguments)
+                    } catch (e: IllegalArgumentException) {
+                       throw IllegalArgumentException("Can't resolve type ${type} (${type.fqName}) in context $context", e)
+                    }
+                }
                 ?: Result.Mutable(Result.Mutable.Reason.UNKNOWN)
 
     }
