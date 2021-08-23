@@ -65,7 +65,9 @@ interface ImmutabilityWithContext : Immutability {
         else -> Result.Immutable()
     }
 
-    operator fun invoke(descriptor: ClassifierDescriptor, parameters: List<TypeProjection>): Result
+    fun resolveType(descriptor: ClassifierDescriptor, parameters: List<TypeProjection>): Result
 
-    operator fun invoke(type: KotlinType): Result
+    fun resolveType(type: KotlinType): Result
+
+    fun resolveDescriptor(descriptor: ClassifierDescriptor): Result
 }

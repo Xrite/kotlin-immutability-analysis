@@ -16,7 +16,7 @@ data class Outer(
 ) : Dependency() {
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
         val outer = descriptor.toString()
-        return when (val status = immutability(descriptor.defaultType)) {
+        return when (val status = immutability.resolveType(descriptor.defaultType)) {
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
                     Reason.ASSUMPTION -> OuterClassTypeConditionallyDeeplyImmutable(

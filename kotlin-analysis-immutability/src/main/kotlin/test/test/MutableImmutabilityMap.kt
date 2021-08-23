@@ -87,7 +87,9 @@ class MutableImmutabilityMap(private val entities: List<Entity>, private vararg 
 
         private fun index(projection: TypeProjection) = indices[projection.type.constructor]
 
-        override operator fun invoke(
+        private fun index(descriptor: TypeParameterDescriptor) = indices[descriptor.original.typeConstructor]
+
+        override fun resolveType(
             descriptor: ClassifierDescriptor,
             parameters: List<TypeProjection>
         ): ImmutabilityWithContext.Result = mapWithAssumptions(descriptor)?.let {
@@ -106,7 +108,7 @@ class MutableImmutabilityMap(private val entities: List<Entity>, private vararg 
                                 }
                             }
                             else -> {
-                                when (val t = invoke(parameters[i].type)) {
+                                when (val t = resolveType(parameters[i].type)) {
                                     is ImmutabilityWithContext.Result.ConditionallyDeeplyImmutable -> t
                                     is ImmutabilityWithContext.Result.Immutable -> t
                                     is ImmutabilityWithContext.Result.Mutable -> ImmutabilityWithContext.Result.ShallowImmutable()
@@ -122,7 +124,7 @@ class MutableImmutabilityMap(private val entities: List<Entity>, private vararg 
             }
         } ?: ImmutabilityWithContext.Result.Mutable(ImmutabilityWithContext.Result.Mutable.Reason.UNKNOWN)
 
-        override operator fun invoke(
+        override fun resolveType(
             type: KotlinType
         ): ImmutabilityWithContext.Result =
             if (type.isTypeParameter()) {
@@ -137,7 +139,7 @@ class MutableImmutabilityMap(private val entities: List<Entity>, private vararg 
             }
                 ?: type.constructor.declarationDescriptor?.let {
                     try {
-                        invoke(it, type.arguments)
+                        resolveType(it, type.arguments)
                     } catch (e: IllegalArgumentException) {
                         throw IllegalArgumentException(
                             "Can't resolve type ${type} (${type.fqName}) in context $context",
@@ -147,7 +149,31 @@ class MutableImmutabilityMap(private val entities: List<Entity>, private vararg 
                 }
                 ?: ImmutabilityWithContext.Result.Mutable(ImmutabilityWithContext.Result.Mutable.Reason.UNKNOWN)
 
+        override fun resolveDescriptor(descriptor: ClassifierDescriptor): ImmutabilityWithContext.Result {
+            return mapWithAssumptions(descriptor)?.let { property ->
+                when (property) {
+                    is ImmutabilityProperty.ConditionallyDeeplyImmutable -> {
+                        val conditions = descriptor.typeConstructor.parameters
+                            .filterIndexed { index, _ -> index in property.conditions }
+                            .map {
+                                index(it) ?: return@let ImmutabilityWithContext.Result.Mutable(
+                                    ImmutabilityWithContext.Result.Mutable.Reason.RESOLVED
+                                )
+                            }
+                            .toSet()
+                        val reason = if (property.isByAssumption()) {
+                            ImmutabilityWithContext.Result.ConditionallyDeeplyImmutable.Reason.ASSUMPTION
+                        } else {
+                            ImmutabilityWithContext.Result.ConditionallyDeeplyImmutable.Reason.RESOLVED
+                        }
+                        ImmutabilityWithContext.Result.ConditionallyDeeplyImmutable(conditions, reason)
+                    }
+                    is ImmutabilityProperty.Immutable -> ImmutabilityWithContext.Result.Immutable(if (property.isByAssumption()) ImmutabilityWithContext.Result.Immutable.Reason.ASSUMPTION else ImmutabilityWithContext.Result.Immutable.Reason.RESOLVED)
+                    is ImmutabilityProperty.Mutable -> ImmutabilityWithContext.Result.Mutable(if (property.isByAssumption()) ImmutabilityWithContext.Result.Mutable.Reason.ASSUMPTION else ImmutabilityWithContext.Result.Mutable.Reason.RESOLVED)
+                    is ImmutabilityProperty.ShallowImmutable -> ImmutabilityWithContext.Result.ShallowImmutable(if (property.isByAssumption()) ImmutabilityWithContext.Result.ShallowImmutable.Reason.ASSUMPTION else ImmutabilityWithContext.Result.ShallowImmutable.Reason.RESOLVED)
+                }
+            } ?: ImmutabilityWithContext.Result.Mutable(ImmutabilityWithContext.Result.Mutable.Reason.UNKNOWN)
+        }
+
     }
-
-
 }

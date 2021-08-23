@@ -5,7 +5,6 @@ import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
 import test.test.ImmutabilityProperty
 import test.test.ImmutabilityWithContext
-import test.test.ImmutabilityWithContext.*
 import test.test.ImmutabilityWithContext.Result.*
 import test.test.reasons.shallow_immutable.ValPropertyShallowImmutable
 import test.test.reasons.conditionally_deeply_immutable.ValPropertyConditionallyDeeplyImmutable
@@ -23,7 +22,7 @@ data class ValParameter(
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
         val parameter = desc.toString()
-        return when (val status = immutability(type)) {
+        return when (val status = immutability.resolveType(type)) {
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
                     ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ValPropertyConditionallyDeeplyImmutable(

@@ -22,7 +22,7 @@ data class ValProperty(
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
         val property = desc.toString()
-        return when (val status = immutability(type)) {
+        return when (val status = immutability.resolveType(type)) {
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
                     ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ValPropertyConditionallyDeeplyImmutable(

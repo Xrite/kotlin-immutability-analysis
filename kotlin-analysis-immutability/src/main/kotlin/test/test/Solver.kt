@@ -9,10 +9,10 @@ private fun ClassTemplate.calcStatus(
     val resolve = immutabilityMap.WithContext(this.parameters)
     val neighbors = this.dependencies.map { dependency ->
         dependency.recalculate(object : ImmutabilityWithContext by resolve {
-            override fun invoke(type: KotlinType): ImmutabilityWithContext.Result = try {
-                resolve(type)
-            } catch (e: IllegalArgumentException) {
-                throw IllegalArgumentException("Failed to resolve type $type in ${this@calcStatus.desc.toSourceElement.containingFile}", e)
+            override fun resolveType(type: KotlinType): ImmutabilityWithContext.Result = try {
+                resolve.resolveType(type)
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Failed to resolve type $type in ${this@calcStatus.desc} (${this@calcStatus.desc.toSourceElement.containingFile})", e)
             }
         })
     }

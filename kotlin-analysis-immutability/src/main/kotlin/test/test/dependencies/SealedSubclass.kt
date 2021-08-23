@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
 import test.test.ImmutabilityProperty
 import test.test.ImmutabilityWithContext
+import test.test.ImmutabilityWithContext.*
 import test.test.ImmutabilityWithContext.Result.*
 import test.test.reasons.shallow_immutable.SealedSubclassShallowImmutable
 import test.test.reasons.conditionally_deeply_immutable.SealedSubclassConditionallyDeeplyImmutable
@@ -21,7 +22,7 @@ class SealedSubclass(
     }
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
-        return when (val result = immutability(type)) {
+        return when (val result = immutability.resolveDescriptor(descriptor)) {
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (result.reason) {
                     ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> SealedSubclassConditionallyDeeplyImmutable(
@@ -35,8 +36,8 @@ class SealedSubclass(
             is Mutable -> {
                 val reason = when (result.reason) {
                     Mutable.Reason.ASSUMPTION -> SealedSubclassMutable(SealedSubclassMutable.Type.MUTABLE_BY_ASSUMPTION, descriptor.toString())
-                    Mutable.Reason.UNKNOWN -> SealedSubclassMutable(SealedSubclassMutable.Type.UNKNOWN, descriptor.toString())
                     Mutable.Reason.RESOLVED -> SealedSubclassMutable(SealedSubclassMutable.Type.MUTABLE, descriptor.toString())
+                    Mutable.Reason.UNKNOWN -> SealedSubclassMutable(SealedSubclassMutable.Type.UNKNOWN, descriptor.toString())
                 }
                 return ImmutabilityProperty.Mutable(reason)
             }

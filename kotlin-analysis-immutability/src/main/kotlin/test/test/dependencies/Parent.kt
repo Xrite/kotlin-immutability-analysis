@@ -24,7 +24,7 @@ data class Parent(
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
         val parent = descriptor.toString()
-        return when (val status = immutability(type)) {
+        return when (val status = immutability.resolveType(type)) {
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
                     ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ParentTypeConditionallyDeeplyImmutable(
