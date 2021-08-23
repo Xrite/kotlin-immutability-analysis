@@ -3,11 +3,12 @@ package test.test.dependencies
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
-import test.test.ImmutabilityMap
 import test.test.ImmutabilityProperty
-import test.test.reasons.shallow_immutable.ParentTypeShallowImmutable
+import test.test.ImmutabilityWithContext
+import test.test.ImmutabilityWithContext.Result.*
 import test.test.reasons.conditionally_deeply_immutable.ParentTypeConditionallyDeeplyImmutable
 import test.test.reasons.mutable.ParentTypeMutable
+import test.test.reasons.shallow_immutable.ParentTypeShallowImmutable
 
 data class Parent(
     val descriptor: ClassifierDescriptor,
@@ -21,45 +22,45 @@ data class Parent(
                 ?: Error("Parent doesn't have ClassifierDescriptor, type: $kotlinType")
     }
 
-    override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty {
+    override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
         val parent = descriptor.toString()
-        return when (val status = resolve(type)) {
-            is ImmutabilityMap.Result.ConditionallyDeeplyImmutable -> {
+        return when (val status = immutability(type)) {
+            is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ParentTypeConditionallyDeeplyImmutable(
+                    ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ParentTypeConditionallyDeeplyImmutable(
                         true
                     )
-                    ImmutabilityMap.Result.ConditionallyDeeplyImmutable.Reason.RESOLVED -> ParentTypeConditionallyDeeplyImmutable(
+                    ConditionallyDeeplyImmutable.Reason.RESOLVED -> ParentTypeConditionallyDeeplyImmutable(
                         false
                     )
                 }
                 ImmutabilityProperty.ConditionallyDeeplyImmutable(status.conditions, reason)
             }
-            is ImmutabilityMap.Result.Immutable -> ImmutabilityProperty.Immutable()
-            is ImmutabilityMap.Result.Mutable -> {
+            is Immutable -> ImmutabilityProperty.Immutable()
+            is Mutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Mutable.Reason.ASSUMPTION -> ParentTypeMutable(
+                    Mutable.Reason.ASSUMPTION -> ParentTypeMutable(
                         ParentTypeMutable.Type.MUTABLE_BY_ASSUMPTION,
                         parent
                     )
-                    ImmutabilityMap.Result.Mutable.Reason.UNKNOWN -> ParentTypeMutable(
+                    Mutable.Reason.UNKNOWN -> ParentTypeMutable(
                         ParentTypeMutable.Type.UNKNOWN,
                         parent
                     )
-                    ImmutabilityMap.Result.Mutable.Reason.RESOLVED -> ParentTypeMutable(
+                    Mutable.Reason.RESOLVED -> ParentTypeMutable(
                         ParentTypeMutable.Type.MUTABLE,
                         parent
                     )
                 }
                 ImmutabilityProperty.Mutable(reason)
             }
-            is ImmutabilityMap.Result.ShallowImmutable -> {
+            is ShallowImmutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.ShallowImmutable.Reason.ASSUMPTION -> ParentTypeShallowImmutable(
+                    ShallowImmutable.Reason.ASSUMPTION -> ParentTypeShallowImmutable(
                         true,
                         parent
                     )
-                    ImmutabilityMap.Result.ShallowImmutable.Reason.RESOLVED -> ParentTypeShallowImmutable(
+                    ShallowImmutable.Reason.RESOLVED -> ParentTypeShallowImmutable(
                         false,
                         parent
                     )

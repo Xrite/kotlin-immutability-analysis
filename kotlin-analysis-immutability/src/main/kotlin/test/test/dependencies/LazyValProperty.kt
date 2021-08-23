@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.psi.KtPropertyDelegate
 import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
-import test.test.ImmutabilityMap
 import test.test.ImmutabilityProperty
+import test.test.ImmutabilityWithContext
 
 class LazyValProperty(
     val desc: VariableDescriptor,
@@ -18,6 +18,6 @@ class LazyValProperty(
             LazyValProperty(desc, desc.type, delegate)
     }
 
-    override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
+    override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty =
         ImmutabilityProperty.Immutable()
 }

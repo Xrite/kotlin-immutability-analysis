@@ -3,8 +3,9 @@ package test.test.dependencies
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
-import test.test.ImmutabilityMap
 import test.test.ImmutabilityProperty
+import test.test.ImmutabilityWithContext
+import test.test.ImmutabilityWithContext.Result.*
 import test.test.reasons.shallow_immutable.ValPropertyShallowImmutable
 import test.test.reasons.conditionally_deeply_immutable.ValPropertyConditionallyDeeplyImmutable
 
@@ -19,36 +20,36 @@ data class ValProperty(
             ValProperty(desc, desc.type, listOf(desc.type.arguments))
     }
 
-    override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty {
+    override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
         val property = desc.toString()
-        return when (val status = resolve(type)) {
-            is ImmutabilityMap.Result.ConditionallyDeeplyImmutable -> {
+        return when (val status = immutability(type)) {
+            is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ValPropertyConditionallyDeeplyImmutable(
+                    ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ValPropertyConditionallyDeeplyImmutable(
                         byAssumption = true,
                         isParameter = false
                     )
-                    ImmutabilityMap.Result.ConditionallyDeeplyImmutable.Reason.RESOLVED -> ValPropertyConditionallyDeeplyImmutable(
+                    ConditionallyDeeplyImmutable.Reason.RESOLVED -> ValPropertyConditionallyDeeplyImmutable(
                         byAssumption = false,
                         isParameter = false
                     )
                 }
                 ImmutabilityProperty.ConditionallyDeeplyImmutable(status.conditions, reason)
             }
-            is ImmutabilityMap.Result.Immutable -> ImmutabilityProperty.Immutable()
-            is ImmutabilityMap.Result.Mutable -> {
+            is Immutable -> ImmutabilityProperty.Immutable()
+            is Mutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.Mutable.Reason.ASSUMPTION -> ValPropertyShallowImmutable(
+                    Mutable.Reason.ASSUMPTION -> ValPropertyShallowImmutable(
                         ValPropertyShallowImmutable.Type.MUTABLE_BY_ASSUMPTION,
                         false,
                         property
                     )
-                    ImmutabilityMap.Result.Mutable.Reason.UNKNOWN -> ValPropertyShallowImmutable(
+                    Mutable.Reason.UNKNOWN -> ValPropertyShallowImmutable(
                         ValPropertyShallowImmutable.Type.UNKNOWN,
                         false,
                         property
                     )
-                    ImmutabilityMap.Result.Mutable.Reason.RESOLVED -> ValPropertyShallowImmutable(
+                    Mutable.Reason.RESOLVED -> ValPropertyShallowImmutable(
                         ValPropertyShallowImmutable.Type.MUTABLE,
                         false,
                         property
@@ -56,14 +57,14 @@ data class ValProperty(
                 }
                 ImmutabilityProperty.ShallowImmutable(reason)
             }
-            is ImmutabilityMap.Result.ShallowImmutable -> {
+            is ShallowImmutable -> {
                 val reason = when (status.reason) {
-                    ImmutabilityMap.Result.ShallowImmutable.Reason.ASSUMPTION -> ValPropertyShallowImmutable(
+                    ShallowImmutable.Reason.ASSUMPTION -> ValPropertyShallowImmutable(
                         ValPropertyShallowImmutable.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION,
                         false,
                         property
                     )
-                    ImmutabilityMap.Result.ShallowImmutable.Reason.RESOLVED -> ValPropertyShallowImmutable(
+                    ShallowImmutable.Reason.RESOLVED -> ValPropertyShallowImmutable(
                         ValPropertyShallowImmutable.Type.SHALLOW_IMMUTABLE,
                         false,
                         property

@@ -1,11 +1,10 @@
 package test.test.dependencies
 
-import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
-import test.test.ImmutabilityMap
 import test.test.ImmutabilityProperty
+import test.test.ImmutabilityWithContext
 
 data class DebugType(val debug: List<Any?>) : Dependency() {
-    override fun recalculate(resolve: (KotlinType) -> ImmutabilityMap.Result): ImmutabilityProperty =
+    override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty =
         ImmutabilityProperty.Immutable()
 }

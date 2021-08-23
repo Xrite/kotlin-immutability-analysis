@@ -1,25 +1,26 @@
 package test.test
 
 import org.jetbrains.kotlin.load.kotlin.toSourceElement
+import org.jetbrains.kotlin.types.KotlinType
 
 private fun ClassTemplate.calcStatus(
-    immutabilityMap: ImmutabilityMap
+    immutabilityMap: MutableImmutabilityMap
 ): ImmutabilityProperty {
-    val resolve = immutabilityMap.Resolver(this.parameters)
+    val resolve = immutabilityMap.WithContext(this.parameters)
     val neighbors = this.dependencies.map { dependency ->
-        dependency.recalculate {
-            try {
-                resolve(it)
+        dependency.recalculate(object : ImmutabilityWithContext by resolve {
+            override fun invoke(type: KotlinType): ImmutabilityWithContext.Result = try {
+                resolve(type)
             } catch (e: IllegalArgumentException) {
-                throw IllegalArgumentException("Failed to resolve type $it in ${this.desc.toSourceElement.containingFile}", e)
+                throw IllegalArgumentException("Failed to resolve type $type in ${this@calcStatus.desc.toSourceElement.containingFile}", e)
             }
-        }
+        })
     }
     return join(neighbors)
 }
 
-fun solve(entities: List<Entity>, vararg assumptions: Assumptions): ImmutabilityMap {
-    val immutability = ImmutabilityMap(entities, *assumptions)
+fun solve(entities: List<Entity>, vararg assumptions: Assumptions): Immutability {
+    val immutability = MutableImmutabilityMap(entities, *assumptions)
     var iter = 0
     while (true) {
         iter++

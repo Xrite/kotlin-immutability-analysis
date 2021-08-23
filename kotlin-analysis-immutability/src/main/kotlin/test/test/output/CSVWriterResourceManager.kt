@@ -11,7 +11,7 @@ import java.nio.file.Path
 
 class CSVWriterResourceManager(private val directory: Path, private val fileName: String) : ResourceManager {
     private val header = listOf("project", "name", "type", "immutability", "tests", "reason", "info")
-    fun addResult(projectName: String, tests: TestsType, immutabilityMap: ImmutabilityMap) {
+    fun addResult(projectName: String, tests: TestsType, immutabilityMap: Immutability) {
         immutabilityMap.results().forEach { (entity, status) ->
             val result = when (status) {
                 is ImmutabilityProperty.ConditionallyDeeplyImmutable -> "ConditionallyDeeplyImmutable"

@@ -1,6 +1,6 @@
 package test.test
 
-class Statistics(private val immutabilityMap: ImmutabilityMap) {
+class Statistics(private val immutabilityMap: Immutability) {
     fun percentage(): String {
         val results = immutabilityMap.results()
         val immutable = results.filter { it.second is ImmutabilityProperty.Immutable }
