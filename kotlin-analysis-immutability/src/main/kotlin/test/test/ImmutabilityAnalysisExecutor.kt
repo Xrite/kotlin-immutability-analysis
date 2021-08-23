@@ -1,6 +1,13 @@
 package test.test
 
 import com.intellij.openapi.project.Project
+import com.sksamuel.hoplite.ConfigLoader
+import com.sksamuel.hoplite.PropertySource
+import com.sksamuel.hoplite.decoder.BooleanDecoder
+import com.sksamuel.hoplite.decoder.DataClassDecoder
+import com.sksamuel.hoplite.decoder.ListDecoder
+import com.sksamuel.hoplite.decoder.StringDecoder
+import com.sksamuel.hoplite.yaml.YamlParser
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
 import org.jetbrains.research.ml.kotlinAnalysis.AnalysisExecutor
 import org.jetbrains.research.ml.kotlinAnalysis.ResourceManager
@@ -10,17 +17,28 @@ import test.test.assumptions.KotlinCollections
 import test.test.assumptions.KotlinFunctions
 import test.test.extractors.*
 import test.test.output.CSVWriterResourceManager
+import java.io.File
 import java.nio.file.Path
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 class ImmutabilityAnalysisExecutor(
     outputDir: Path,
-    configurations: Collection<Configuration> = listOf(
-        Configuration()
-    )
+    inputDir: Path,
 ) : AnalysisExecutor() {
-    private val withWriter = configurations.map { it to CSVWriterResourceManager(outputDir, it.outputFileName) }
+    private val file = File(inputDir.toFile(), "config.yaml")
+
+    private val config = ConfigLoader.Builder()
+        .addSource(PropertySource.file(file))
+        .addDecoder(ListDecoder())
+        .addDecoder(DataClassDecoder())
+        .addDecoder(BooleanDecoder())
+        .addDecoder(StringDecoder())
+        .addFileExtensionMapping("yaml", YamlParser())
+        .build()
+        .loadConfigOrThrow<Config>()
+
+    private val withWriter = config.tasks.map { it to CSVWriterResourceManager(outputDir, it.outputFileName) }
     override val controlledResourceManagers: Set<ResourceManager> = withWriter.map { it.second }.toSet()
 
     @OptIn(ExperimentalTime::class)
