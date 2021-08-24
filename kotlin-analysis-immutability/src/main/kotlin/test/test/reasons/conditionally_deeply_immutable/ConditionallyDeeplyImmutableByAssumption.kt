@@ -4,4 +4,7 @@ import test.test.reasons.ConditionallyDeeplyImmutableReason
 
 object ConditionallyDeeplyImmutableByAssumption : ConditionallyDeeplyImmutableReason() {
     override fun isByAssumption(): Boolean = true
+    override val csvData = object : CSVData {
+        override val reason = "Assumption"
+    }
 }

@@ -3,8 +3,8 @@ package test.test.reasons
 sealed class Reason {
     open fun isByAssumption(): Boolean = false
     open val csvData = object : CSVData {
-        override val reason = "None"
-        override val info = "None"
+        override val reason = ""
+        override val info = ""
     }
 
     interface CSVData {
