@@ -62,6 +62,7 @@ class ImmutabilityAnalysisExecutor(
                 fs.add(::extractGetter)
             }
             fs.add(::extractBase)
+            ex.add(PropertiesExtractor(rf, fs))
             ex.add(ValueParametersExtractor(rf))
             ex.add(ParentsExtractor(rf))
             ex.add(OuterClassesExtractor(rf))

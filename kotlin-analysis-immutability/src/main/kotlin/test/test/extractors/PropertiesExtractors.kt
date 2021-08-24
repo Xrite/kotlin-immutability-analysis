@@ -15,7 +15,7 @@ import test.test.dependencies.*
 
 class PropertiesExtractor(
     private val resolutionFacade: ResolutionFacade?,
-    private vararg val priority: (KtProperty, VariableDescriptor) -> Dependency?,
+    private val priority: List<(KtProperty, VariableDescriptor) -> Dependency?>,
 ) :
     ClassOrObjectExtractor<Dependencies>() {
     override fun fromClassOrObject(psiElement: KtClassOrObject): Dependencies =
