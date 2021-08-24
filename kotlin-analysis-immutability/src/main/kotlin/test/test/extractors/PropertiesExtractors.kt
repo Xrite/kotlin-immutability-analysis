@@ -8,6 +8,8 @@ import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
 import org.jetbrains.kotlin.idea.util.getResolutionScope
 import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.resolve.descriptorUtil.isExtension
+import org.jetbrains.kotlin.resolve.descriptorUtil.isExtensionProperty
 import org.jetbrains.kotlin.utils.addToStdlib.firstNotNullResult
 import test.test.*
 import test.test.dependencies.*
@@ -33,10 +35,10 @@ class PropertiesExtractor(
 typealias F = (KtProperty, VariableDescriptor) -> Dependency?
 
 fun extractBase(property: KtProperty, descriptor: VariableDescriptor): Dependency =
-    if (descriptor.isVar) {
-        VarProperty.fromDescriptor(descriptor)
-    } else {
-        ValProperty.fromDescriptor(descriptor)
+    when {
+        descriptor.isExtensionProperty -> ExtensionProperty.fromDescriptor(descriptor)
+        descriptor.isVar -> VarProperty.fromDescriptor(descriptor)
+        else -> ValProperty.fromDescriptor(descriptor)
     }
 
 fun extractDelegate(property: KtProperty, descriptor: VariableDescriptor): Dependency? =

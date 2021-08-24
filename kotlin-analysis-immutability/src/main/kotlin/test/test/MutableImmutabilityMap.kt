@@ -81,9 +81,9 @@ class MutableImmutabilityMap(private val entities: List<Entity>, private vararg 
             }
         }
 
-    inner class WithContext(private val context: List<TypeParameterDescriptor>) : Immutability by this,
+    inner class WithContext(private val descriptor: DeclarationDescriptor, private val contextParameters: List<TypeParameterDescriptor>) : Immutability by this,
         ImmutabilityWithContext {
-        private val indices = context.associate { it.original.typeConstructor to it.index }
+        private val indices = contextParameters.associate { it.original.typeConstructor to it.index }
 
         private fun index(projection: TypeProjection) = indices[projection.type.constructor]
 
@@ -104,7 +104,7 @@ class MutableImmutabilityMap(private val entities: List<Entity>, private vararg 
                                 if (idx != null) {
                                     ImmutabilityWithContext.Result.ConditionallyDeeplyImmutable(idx)
                                 } else {
-                                    throw IllegalArgumentException("Can't get index of ${parameters[i]} in ${descriptor.defaultType} with context $context") //TODO: fix (/Users/Anton.Bukov/work/dataset/InsertKoinIO#koin, /Users/Anton.Bukov/work/dataset/corda#corda)
+                                    throw IllegalArgumentException("Can't get index of ${parameters[i]} in ${descriptor.defaultType} with context $contextParameters") //TODO: fix (/Users/Anton.Bukov/work/dataset/InsertKoinIO#koin, /Users/Anton.Bukov/work/dataset/corda#corda)
                                 }
                             }
                             else -> {
@@ -132,7 +132,7 @@ class MutableImmutabilityMap(private val entities: List<Entity>, private vararg 
                 if (idx != null) {
                     ImmutabilityWithContext.Result.ConditionallyDeeplyImmutable(idx)
                 } else {
-                    throw IllegalArgumentException("Can't get index of $type")
+                    throw IllegalArgumentException("Can't get index of $type in context $descriptor with parameters $contextParameters")
                 }
             } else {
                 null
@@ -142,7 +142,7 @@ class MutableImmutabilityMap(private val entities: List<Entity>, private vararg 
                         resolveType(it, type.arguments)
                     } catch (e: IllegalArgumentException) {
                         throw IllegalArgumentException(
-                            "Can't resolve type ${type} (${type.fqName}) in context $context",
+                            "Can't resolve type ${type} (${type.fqName}) in context $descriptor with parameters $contextParameters",
                             e
                         )
                     }

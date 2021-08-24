@@ -15,8 +15,8 @@ data class Outer(
     val debug: List<Any?> = listOf()
 ) : Dependency() {
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
-        val outer = descriptor.toString()
-        return when (val status = immutability.resolveType(descriptor.defaultType)) {
+        val info = descriptor.toString()
+        return when (val status = immutability.resolveDescriptor(descriptor)) {
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
                     Reason.ASSUMPTION -> OuterClassTypeConditionallyDeeplyImmutable(
@@ -33,12 +33,12 @@ data class Outer(
                 val reason = when (status.reason) {
                     Mutable.Reason.ASSUMPTION -> OuterClassMutable(
                         OuterClassMutable.Type.MUTABLE_BY_ASSUMPTION,
-                        outer
+                        info
                     )
                     Mutable.Reason.UNKNOWN -> throw IllegalArgumentException("Outer class unknown")
                     Mutable.Reason.RESOLVED -> OuterClassMutable(
                         OuterClassMutable.Type.MUTABLE,
-                        outer
+                        info
                     )
                 }
                 ImmutabilityProperty.Mutable(reason)
@@ -47,11 +47,11 @@ data class Outer(
                 val reason = when (status.reason) {
                     ShallowImmutable.Reason.ASSUMPTION -> OuterClassShallowImmutable(
                         true,
-                        outer
+                        info
                     )
                     ShallowImmutable.Reason.RESOLVED -> OuterClassShallowImmutable(
                         false,
-                        outer
+                        info
                     )
                 }
                 ImmutabilityProperty.ShallowImmutable(reason)
