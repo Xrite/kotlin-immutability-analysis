@@ -46,27 +46,7 @@ class ImmutabilityAnalysisExecutor(
         val rf: ResolutionFacade? = null
 
         withWriter.forEach { (configuration, dataWriter) ->
-            val ex = mutableListOf<Extractor<Dependencies>>()
-            if (configuration.analyzeSealedSubclasses) {
-                ex.add(SealedSubclassesExtractor(rf))
-            }
-            if (configuration.assumeNastyInheritors) {
-                ex.add(UnknownSubclassExtractor(rf))
-            }
-            val fs = mutableListOf<F>()
-            if (configuration.treatLazyAsImmutable) {
-                fs.add(::extractLazyDelegate)
-            }
-            fs.add(::extractDelegate)
-            if (!configuration.assumeGoodGetters) {
-                fs.add(::extractGetter)
-            }
-            fs.add(::extractBase)
-            ex.add(PropertiesExtractor(rf, fs))
-            ex.add(ValueParametersExtractor(rf))
-            ex.add(ParentsExtractor(rf))
-            ex.add(OuterClassesExtractor(rf))
-            val extractor = MultipleExtractors(ex)
+            val extractor = makeExtractor(rf, configuration)
 
             val time = measureTime {
                 println("Output: ${configuration.outputFileName}")

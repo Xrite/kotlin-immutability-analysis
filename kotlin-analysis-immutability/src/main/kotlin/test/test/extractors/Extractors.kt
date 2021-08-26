@@ -42,6 +42,7 @@ class MultipleExtractors(private val extractors: Collection<Extractor<Dependenci
 
     override fun fromObject(psiElement: KtObjectDeclaration): Dependencies =
         extractors.flatMap { it.fromObject(psiElement) }
+
     constructor(vararg extractors: Extractor<Dependencies>) : this(extractors.toList())
 }
 
@@ -163,4 +164,26 @@ fun makeEntities(
     }
     assert(type == type2)
     return fromClasses + fromObjects to type
+}
+
+fun makeExtractor(resolutionFacade: ResolutionFacade?, taskConfiguration: TaskConfiguration): Extractor<Dependencies> {
+    val ex = mutableListOf<Extractor<Dependencies>>()
+    if (taskConfiguration.analyzeSealedSubclasses) {
+        ex.add(SealedSubclassesExtractor(resolutionFacade))
+    }
+    if (taskConfiguration.assumeNastyInheritors) {
+        ex.add(UnknownSubclassExtractor(resolutionFacade))
+    }
+    ex.add(
+        PropertiesExtractorWithFlags(
+            resolutionFacade,
+            treatLazyAsImmutable = taskConfiguration.treatLazyAsImmutable,
+            assumeGoodGetters = taskConfiguration.assumeGoodGetters,
+            analyzeDelegates = taskConfiguration.analyzeDelegates
+        )
+    )
+    ex.add(ValueParametersExtractor(resolutionFacade))
+    ex.add(ParentsExtractor(resolutionFacade))
+    ex.add(OuterClassesExtractor(resolutionFacade))
+    return MultipleExtractors(ex)
 }
