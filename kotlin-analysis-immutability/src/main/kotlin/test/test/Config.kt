@@ -1,19 +1,20 @@
 package test.test
 
-data class Config(val tasks: List<Task>)
+data class Config(val tasks: List<TaskConfiguration>)
 
-data class Task(
+data class TaskConfiguration(
     val treatCollectionsAsMutable: Boolean = false,
     val treatLazyAsImmutable: Boolean = false,
     val analyzeSealedSubclasses: Boolean = false,
     val assumeNastyInheritors: Boolean = false,
     val assumeGoodGetters: Boolean = false,
     val includeTests: Boolean = false,
+    val analyzeDelegates: Boolean = false,
     val outputFileName: String
 )
 
 val defaultConfig = Config(listOf(
-    Task(
+    TaskConfiguration(
         treatCollectionsAsMutable = false,
         treatLazyAsImmutable = true,
         analyzeSealedSubclasses = false,
@@ -22,7 +23,7 @@ val defaultConfig = Config(listOf(
         includeTests = false,
         outputFileName = "results_default_without_tests.csv"
     ),
-    Task(
+    TaskConfiguration(
         treatCollectionsAsMutable = false,
         treatLazyAsImmutable = true,
         analyzeSealedSubclasses = false,
@@ -31,7 +32,7 @@ val defaultConfig = Config(listOf(
         includeTests = true,
         outputFileName = "results_default_with_tests.csv"
     ),
-    Task(
+    TaskConfiguration(
         treatCollectionsAsMutable = true,
         treatLazyAsImmutable = true,
         analyzeSealedSubclasses = true,
@@ -40,7 +41,7 @@ val defaultConfig = Config(listOf(
         includeTests = false,
         outputFileName = "results_pessimistic_without_tests.csv"
     ),
-    Task(
+    TaskConfiguration(
         treatCollectionsAsMutable = true,
         treatLazyAsImmutable = true,
         analyzeSealedSubclasses = true,
@@ -49,7 +50,7 @@ val defaultConfig = Config(listOf(
         includeTests = true,
         outputFileName = "results_pessimistic_with_tests.csv"
     ),
-    Task(
+    TaskConfiguration(
         treatCollectionsAsMutable = false,
         treatLazyAsImmutable = true,
         analyzeSealedSubclasses = false,
@@ -58,7 +59,7 @@ val defaultConfig = Config(listOf(
         includeTests = false,
         outputFileName = "results_optimistic_without_tests.csv"
     ),
-    Task(
+    TaskConfiguration(
         treatCollectionsAsMutable = false,
         treatLazyAsImmutable = true,
         analyzeSealedSubclasses = false,

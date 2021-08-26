@@ -6,17 +6,20 @@ import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
 import test.test.ImmutabilityProperty
 import test.test.ImmutabilityWithContext
+import test.test.reasons.mutable.DelegatedProperty
 
-class LazyValProperty(
+data class DelegatedValPropertyIsMutable(
     val desc: VariableDescriptor,
     val type: KotlinType,
+    val delegate: KtPropertyDelegate,
     val debug: List<Any?> = listOf()
-) : Dependency() {
+) :
+    Dependency() {
     companion object {
-        fun fromDescriptor(desc: VariableDescriptor): Dependency =
-            LazyValProperty(desc, desc.type)
+        fun fromDescriptor(desc: VariableDescriptor, delegate: KtPropertyDelegate): DelegatedValPropertyIsMutable =
+            DelegatedValPropertyIsMutable(desc, desc.type, delegate)
     }
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty =
-        ImmutabilityProperty.Immutable()
+        ImmutabilityProperty.Mutable(DelegatedProperty(desc.toString()))
 }

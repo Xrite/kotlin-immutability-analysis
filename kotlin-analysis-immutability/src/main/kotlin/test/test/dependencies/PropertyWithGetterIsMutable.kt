@@ -6,15 +6,15 @@ import test.test.Dependency
 import test.test.ImmutabilityProperty
 import test.test.ImmutabilityWithContext
 
-data class PropertyWithGetter(
+data class PropertyWithGetterIsMutable(
     val desc: VariableDescriptor,
     val type: KotlinType,
     val debug: List<Any?> = listOf()
 ) :
     Dependency() {
     companion object {
-        fun fromDescriptor(desc: VariableDescriptor): Dependency =
-            PropertyWithGetter(desc, desc.type)
+        fun fromDescriptor(desc: VariableDescriptor): PropertyWithGetterIsMutable =
+            PropertyWithGetterIsMutable(desc, desc.type)
     }
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty =
