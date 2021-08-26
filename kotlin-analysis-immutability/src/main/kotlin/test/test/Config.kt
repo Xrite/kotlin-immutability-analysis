@@ -1,6 +1,8 @@
 package test.test
 
-data class Config(val tasks: List<TaskConfiguration>)
+import kotlin.reflect.full.memberProperties
+
+data class Config(val tasks: List<TaskConfiguration>, val joinOutputFile: String? = null)
 
 data class TaskConfiguration(
     val treatCollectionsAsMutable: Boolean = false,
@@ -11,7 +13,15 @@ data class TaskConfiguration(
     val includeTests: Boolean = false,
     val analyzeDelegates: Boolean = false,
     val outputFileName: String
-)
+) {
+    companion object
+}
+
+val TaskConfiguration.Companion.flags: List<String>
+    get() = TaskConfiguration::class.memberProperties.map { it.name }
+
+val TaskConfiguration.values: List<Any?>
+    get() = TaskConfiguration::class.memberProperties.map { it.get(this) }
 
 val defaultConfig = Config(listOf(
     TaskConfiguration(

@@ -10,8 +10,15 @@ import java.io.File
 import java.nio.file.Path
 
 class CSVWriterResourceManager(private val directory: Path, private val fileName: String) : ResourceManager {
-    private val header = listOf("project", "name", "type", "immutability", "tests", "reason", "info")
-    fun addResult(projectName: String, tests: TestsType, immutabilityMap: Immutability) {
+    private val header =
+        listOf("project", "name", "type", "immutability", "tests", "reason", "info") + TaskConfiguration.flags
+
+    fun addResult(
+        projectName: String,
+        tests: TestsType,
+        immutabilityMap: Immutability,
+        taskConfiguration: TaskConfiguration
+    ) {
         immutabilityMap.results().forEach { (entity, status) ->
             val result = when (status) {
                 is ImmutabilityProperty.ConditionallyDeeplyImmutable -> "ConditionallyDeeplyImmutable"
@@ -29,7 +36,16 @@ class CSVWriterResourceManager(private val directory: Path, private val fileName
             }
             status.reasons.forEach {
                 val data = it.csvData
-                printer.printRecord(projectName, name, type, result, tests, data.reason, data.info)
+                printer.printRecord(
+                    projectName,
+                    name,
+                    type,
+                    result,
+                    tests,
+                    data.reason,
+                    data.info,
+                    *taskConfiguration.values.toTypedArray()
+                )
             }
         }
     }

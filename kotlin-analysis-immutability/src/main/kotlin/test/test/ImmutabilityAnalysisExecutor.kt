@@ -38,8 +38,10 @@ class ImmutabilityAnalysisExecutor(
         .build()
         .loadConfigOrThrow<Config>()
 
+    private val joinWriter = config.joinOutputFile?.let { CSVWriterResourceManager(outputDir, it) }
     private val withWriter = config.tasks.map { it to CSVWriterResourceManager(outputDir, it.outputFileName) }
-    override val controlledResourceManagers: Set<ResourceManager> = withWriter.map { it.second }.toSet()
+    override val controlledResourceManagers: Set<ResourceManager> =
+        withWriter.map { it.second }.toSet() + (joinWriter?.let { setOf(it) } ?: setOf())
 
     @OptIn(ExperimentalTime::class)
     override fun analyse(project: Project) {
@@ -63,7 +65,6 @@ class ImmutabilityAnalysisExecutor(
                     return
                 }
 
-                //println(entities)
                 val result =
                     solve(
                         entities,
@@ -72,23 +73,13 @@ class ImmutabilityAnalysisExecutor(
                         KotlinCollections(configuration.treatCollectionsAsMutable),
                         KotlinFunctions
                     )
-                //println(properties)
-                //println(classifiers)
                 val stats = Statistics(result)
                 println(stats.percentage())
-                dataWriter.addResult(project.name, type, result)
+                dataWriter.addResult(project.name, type, result, configuration)
+                joinWriter?.addResult(project.name, type, result, configuration)
             }
             println("Analysis done in $time")
             println()
         }
-
-        /*
-        val extractor = MultipleExtractors(
-            PropertiesExtractor(rf, ::extractLazyDelegate, ::extractDelegate, ::extractGetter, ::extractBase),
-            ValueParametersExtractor(rf),
-            ParentsExtractor(rf),
-            OuterClassesExtractor(rf)
-        )
-         */
     }
 }
