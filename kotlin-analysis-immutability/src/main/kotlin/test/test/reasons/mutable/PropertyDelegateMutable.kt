@@ -1,8 +1,10 @@
 package test.test.reasons.mutable
 
+import com.beust.klaxon.json
+import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import test.test.reasons.MutableReason
 
-class PropertyDelegateMutable(val type: Type, val property: String) : MutableReason() {
+class PropertyDelegateMutable(val type: Type, val propertyDescriptor: PropertyDescriptor) : MutableReason() {
     override val csvData = object : CSVData {
         override val reason: String
             get() = when (type) {
@@ -13,7 +15,11 @@ class PropertyDelegateMutable(val type: Type, val property: String) : MutableRea
                 Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION -> "Property delegate shallow immutable (assumption)"
             }
         override val info: String
-            get() = property
+            get() = json {
+                obj(
+                    "descriptor" to propertyDescriptor.toString(),
+                )
+            }.toJsonString(true)
     }
 
     enum class Type {

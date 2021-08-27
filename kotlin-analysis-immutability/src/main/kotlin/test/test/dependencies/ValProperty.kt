@@ -21,17 +21,19 @@ data class ValProperty(
     }
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
-        val property = desc.toString()
+        val property = desc
         return when (val status = immutability.resolveType(type)) {
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
                     ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ValPropertyConditionallyDeeplyImmutable(
                         byAssumption = true,
-                        isParameter = false
+                        isParameter = false,
+                        property
                     )
                     ConditionallyDeeplyImmutable.Reason.RESOLVED -> ValPropertyConditionallyDeeplyImmutable(
                         byAssumption = false,
-                        isParameter = false
+                        isParameter = false,
+                        property
                     )
                 }
                 ImmutabilityProperty.ConditionallyDeeplyImmutable(status.conditions, reason)

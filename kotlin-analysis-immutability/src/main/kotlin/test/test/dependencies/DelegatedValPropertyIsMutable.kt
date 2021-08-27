@@ -21,5 +21,5 @@ data class DelegatedValPropertyIsMutable(
     }
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty =
-        ImmutabilityProperty.Mutable(DelegatedProperty(desc.toString()))
+        ImmutabilityProperty.Mutable(DelegatedProperty(desc))
 }

@@ -17,7 +17,7 @@ class UnknownSubclassExtractor(private val resolutionFacade: ResolutionFacade?) 
             when {
                 psiElement.isSealed() -> listOf()
                 descriptor.isFinalOrEnum -> listOf()
-                else -> listOf(UnknownSubclass())
+                else -> listOf(UnknownSubclass(descriptor))
             }
         } ?: resolveErrorFor(psiElement)
 

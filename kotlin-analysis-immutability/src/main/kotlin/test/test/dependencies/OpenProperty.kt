@@ -1,5 +1,6 @@
 package test.test.dependencies
 
+import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import test.test.Dependency
 import test.test.ImmutabilityProperty
@@ -15,5 +16,5 @@ class OpenProperty(
     }
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty =
-        ImmutabilityProperty.Mutable(test.test.reasons.mutable.OpenProperty(desc.toString()))
+        ImmutabilityProperty.Mutable(test.test.reasons.mutable.OpenProperty(desc as PropertyDescriptor))
 }

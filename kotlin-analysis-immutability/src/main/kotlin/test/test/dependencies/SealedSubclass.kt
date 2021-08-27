@@ -26,27 +26,27 @@ class SealedSubclass(
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (result.reason) {
                     ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> SealedSubclassConditionallyDeeplyImmutable(
-                        SealedSubclassConditionallyDeeplyImmutable.Type.CONDITIONALLY_DEEPLY_IMMUTABLE_BY_ASSUMPTION, descriptor.toString())
+                        SealedSubclassConditionallyDeeplyImmutable.Type.CONDITIONALLY_DEEPLY_IMMUTABLE_BY_ASSUMPTION, descriptor)
                     ConditionallyDeeplyImmutable.Reason.RESOLVED -> SealedSubclassConditionallyDeeplyImmutable(
-                        SealedSubclassConditionallyDeeplyImmutable.Type.CONDITIONALLY_DEEPLY_IMMUTABLE, descriptor.toString())
+                        SealedSubclassConditionallyDeeplyImmutable.Type.CONDITIONALLY_DEEPLY_IMMUTABLE, descriptor)
                 }
                 return ImmutabilityProperty.ConditionallyDeeplyImmutable(result.conditions, reason)
             }
             is Immutable -> ImmutabilityProperty.Immutable()
             is Mutable -> {
                 val reason = when (result.reason) {
-                    Mutable.Reason.ASSUMPTION -> SealedSubclassMutable(SealedSubclassMutable.Type.MUTABLE_BY_ASSUMPTION, descriptor.toString())
-                    Mutable.Reason.RESOLVED -> SealedSubclassMutable(SealedSubclassMutable.Type.MUTABLE, descriptor.toString())
-                    Mutable.Reason.UNKNOWN -> SealedSubclassMutable(SealedSubclassMutable.Type.UNKNOWN, descriptor.toString())
+                    Mutable.Reason.ASSUMPTION -> SealedSubclassMutable(SealedSubclassMutable.Type.MUTABLE_BY_ASSUMPTION, descriptor)
+                    Mutable.Reason.RESOLVED -> SealedSubclassMutable(SealedSubclassMutable.Type.MUTABLE, descriptor)
+                    Mutable.Reason.UNKNOWN -> SealedSubclassMutable(SealedSubclassMutable.Type.UNKNOWN, descriptor)
                 }
                 return ImmutabilityProperty.Mutable(reason)
             }
             is ShallowImmutable -> {
                 val reason = when (result.reason) {
                     ShallowImmutable.Reason.ASSUMPTION -> SealedSubclassShallowImmutable(
-                        SealedSubclassShallowImmutable.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION, descriptor.toString())
+                        SealedSubclassShallowImmutable.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION, descriptor)
                     ShallowImmutable.Reason.RESOLVED -> SealedSubclassShallowImmutable(
-                        SealedSubclassShallowImmutable.Type.SHALLOW_IMMUTABLE, descriptor.toString())
+                        SealedSubclassShallowImmutable.Type.SHALLOW_IMMUTABLE, descriptor)
                 }
                 return ImmutabilityProperty.ShallowImmutable(reason)
             }

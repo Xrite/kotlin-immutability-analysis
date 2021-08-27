@@ -17,4 +17,5 @@ dependencies {
     implementation("org.apache.commons:commons-csv:1.9.0")
     implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
     implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
+    implementation("com.beust:klaxon:5.5")
 }

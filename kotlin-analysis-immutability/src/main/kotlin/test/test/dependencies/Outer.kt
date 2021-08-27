@@ -15,15 +15,17 @@ data class Outer(
     val debug: List<Any?> = listOf()
 ) : Dependency() {
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
-        val info = descriptor.toString()
+        val classifierDescriptor = descriptor
         return when (val status = immutability.resolveDescriptor(descriptor)) {
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
                     Reason.ASSUMPTION -> OuterClassTypeConditionallyDeeplyImmutable(
-                        true
+                        true,
+                        classifierDescriptor
                     )
                     Reason.RESOLVED -> OuterClassTypeConditionallyDeeplyImmutable(
-                        false
+                        false,
+                        classifierDescriptor
                     )
                 }
                 ImmutabilityProperty.ConditionallyDeeplyImmutable(status.conditions, reason)
@@ -33,12 +35,12 @@ data class Outer(
                 val reason = when (status.reason) {
                     Mutable.Reason.ASSUMPTION -> OuterClassMutable(
                         OuterClassMutable.Type.MUTABLE_BY_ASSUMPTION,
-                        info
+                        classifierDescriptor
                     )
                     Mutable.Reason.UNKNOWN -> throw IllegalArgumentException("Outer class unknown")
                     Mutable.Reason.RESOLVED -> OuterClassMutable(
                         OuterClassMutable.Type.MUTABLE,
-                        info
+                        classifierDescriptor
                     )
                 }
                 ImmutabilityProperty.Mutable(reason)
@@ -47,11 +49,11 @@ data class Outer(
                 val reason = when (status.reason) {
                     ShallowImmutable.Reason.ASSUMPTION -> OuterClassShallowImmutable(
                         true,
-                        info
+                        classifierDescriptor
                     )
                     ShallowImmutable.Reason.RESOLVED -> OuterClassShallowImmutable(
                         false,
-                        info
+                        classifierDescriptor
                     )
                 }
                 ImmutabilityProperty.ShallowImmutable(reason)

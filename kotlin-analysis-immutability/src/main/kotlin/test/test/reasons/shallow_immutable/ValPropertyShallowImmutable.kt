@@ -1,9 +1,11 @@
 package test.test.reasons.shallow_immutable
 
+import com.beust.klaxon.json
+import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.idea.util.string.collapseSpaces
 import test.test.reasons.ShallowImmutableReason
 
-class ValPropertyShallowImmutable(val type: Type, val isParameter: Boolean, val property: String) : ShallowImmutableReason() {
+class ValPropertyShallowImmutable(val type: Type, val isParameter: Boolean, val variableDescriptor: VariableDescriptor) : ShallowImmutableReason() {
     override val csvData = object : CSVData {
         override val reason: String
             get() {
@@ -17,7 +19,11 @@ class ValPropertyShallowImmutable(val type: Type, val isParameter: Boolean, val 
                 }.collapseSpaces()
             }
         override val info: String
-            get() = property
+            get() = json {
+                obj(
+                    "descriptor" to variableDescriptor.toString()
+                )
+            }.toJsonString(true)
     }
 
     enum class Type {

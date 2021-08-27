@@ -1,5 +1,6 @@
 package test.test.dependencies
 
+import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
@@ -18,5 +19,5 @@ data class PropertyWithGetterIsMutable(
     }
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty =
-        ImmutabilityProperty.Mutable(test.test.reasons.mutable.PropertyWithGetter)
+        ImmutabilityProperty.Mutable(test.test.reasons.mutable.PropertyWithGetter(desc as PropertyDescriptor))
 }

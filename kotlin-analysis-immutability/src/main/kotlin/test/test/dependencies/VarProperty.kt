@@ -18,5 +18,5 @@ data class VarProperty(
     }
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty =
-        ImmutabilityProperty.Mutable(test.test.reasons.mutable.VarProperty(false, desc.toString()))
+        ImmutabilityProperty.Mutable(test.test.reasons.mutable.VarProperty(false, desc))
 }

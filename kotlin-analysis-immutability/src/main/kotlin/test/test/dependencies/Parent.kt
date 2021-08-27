@@ -23,15 +23,17 @@ data class Parent(
     }
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty {
-        val parent = descriptor.toString()
+        val parentDescriptor = descriptor
         return when (val status = immutability.resolveType(type)) {
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
                     ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ParentTypeConditionallyDeeplyImmutable(
-                        true
+                        true,
+                        parentDescriptor
                     )
                     ConditionallyDeeplyImmutable.Reason.RESOLVED -> ParentTypeConditionallyDeeplyImmutable(
-                        false
+                        false,
+                        parentDescriptor
                     )
                 }
                 ImmutabilityProperty.ConditionallyDeeplyImmutable(status.conditions, reason)
@@ -41,15 +43,15 @@ data class Parent(
                 val reason = when (status.reason) {
                     Mutable.Reason.ASSUMPTION -> ParentTypeMutable(
                         ParentTypeMutable.Type.MUTABLE_BY_ASSUMPTION,
-                        parent
+                        descriptor
                     )
                     Mutable.Reason.UNKNOWN -> ParentTypeMutable(
                         ParentTypeMutable.Type.UNKNOWN,
-                        parent
+                        descriptor
                     )
                     Mutable.Reason.RESOLVED -> ParentTypeMutable(
                         ParentTypeMutable.Type.MUTABLE,
-                        parent
+                        descriptor
                     )
                 }
                 ImmutabilityProperty.Mutable(reason)
@@ -58,11 +60,11 @@ data class Parent(
                 val reason = when (status.reason) {
                     ShallowImmutable.Reason.ASSUMPTION -> ParentTypeShallowImmutable(
                         true,
-                        parent
+                        parentDescriptor
                     )
                     ShallowImmutable.Reason.RESOLVED -> ParentTypeShallowImmutable(
                         false,
-                        parent
+                        parentDescriptor
                     )
                 }
                 ImmutabilityProperty.ShallowImmutable(reason)
