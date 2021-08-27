@@ -3,6 +3,7 @@ package test.test.reasons.shallow_immutable
 import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import test.test.reasons.ShallowImmutableReason
+import test.test.reasons.basicInfo
 
 class SealedSubclassShallowImmutable(val type: Type, val classifierDescriptor: ClassifierDescriptor) : ShallowImmutableReason() {
     override val csvData = object : CSVData {
@@ -13,9 +14,7 @@ class SealedSubclassShallowImmutable(val type: Type, val classifierDescriptor: C
             }
         override val info: String
             get() = json {
-                obj(
-                    "descriptor" to classifierDescriptor.toString()
-                )
+                obj(*classifierDescriptor.basicInfo)
             }.toJsonString(true)
     }
     enum class Type {

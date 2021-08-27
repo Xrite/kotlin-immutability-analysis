@@ -4,6 +4,7 @@ import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.idea.util.string.collapseSpaces
 import test.test.reasons.ConditionallyDeeplyImmutableReason
+import test.test.reasons.basicInfo
 
 class ValPropertyConditionallyDeeplyImmutable(val byAssumption: Boolean, val isParameter: Boolean, val variableDescriptor: VariableDescriptor) :
     ConditionallyDeeplyImmutableReason() {
@@ -16,9 +17,7 @@ class ValPropertyConditionallyDeeplyImmutable(val byAssumption: Boolean, val isP
             }
         override val info: String
             get() = json {
-                obj(
-                    "descriptor" to variableDescriptor.toString()
-                )
+                obj(*variableDescriptor.basicInfo)
             }.toJsonString(true)
     }
 }

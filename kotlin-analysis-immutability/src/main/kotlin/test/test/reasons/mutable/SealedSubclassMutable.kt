@@ -3,6 +3,9 @@ package test.test.reasons.mutable
 import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import test.test.reasons.MutableReason
+import test.test.reasons.basicInfo
+import test.test.reasons.location
+import test.test.reasons.textWithLocation
 
 class SealedSubclassMutable(val type: Type, val classifierDescriptor: ClassifierDescriptor) : MutableReason() {
     override val csvData = object : CSVData {
@@ -14,9 +17,7 @@ class SealedSubclassMutable(val type: Type, val classifierDescriptor: Classifier
             }
         override val info: String
             get() = json {
-                obj(
-                    "descriptor" to classifierDescriptor.toString()
-                )
+                obj(*classifierDescriptor.basicInfo)
             }.toJsonString(true)
     }
     enum class Type {

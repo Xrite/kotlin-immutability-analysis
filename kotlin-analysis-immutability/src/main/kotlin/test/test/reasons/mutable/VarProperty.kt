@@ -4,6 +4,7 @@ import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.idea.util.string.collapseSpaces
 import test.test.reasons.MutableReason
+import test.test.reasons.basicInfo
 
 class VarProperty(val isParameter: Boolean, val variableDescriptor: VariableDescriptor) : MutableReason() {
     override val csvData = object : CSVData {
@@ -14,9 +15,7 @@ class VarProperty(val isParameter: Boolean, val variableDescriptor: VariableDesc
             }
         override val info: String
             get() = json {
-                obj(
-                    "descriptor" to variableDescriptor.toString()
-                )
+                obj(*variableDescriptor.basicInfo)
             }.toJsonString(true)
     }
 }

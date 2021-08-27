@@ -4,6 +4,7 @@ import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import test.test.reasons.MutableReason
+import test.test.reasons.basicInfo
 
 class OuterClassMutable(val type: Type, val outerDescriptor: DeclarationDescriptor) : MutableReason() {
     override val csvData = object : CSVData {
@@ -15,8 +16,8 @@ class OuterClassMutable(val type: Type, val outerDescriptor: DeclarationDescript
         override val info: String
             get() = json {
                 obj(
-                    "descriptor" to outerDescriptor.toString(),
-                    "fqName" to outerDescriptor.fqNameSafe.asString()
+                    "fqName" to outerDescriptor.fqNameSafe.asString(),
+                    *outerDescriptor.basicInfo
                 )
             }.toJsonString(true)
     }

@@ -3,6 +3,7 @@ package test.test.reasons.conditionally_deeply_immutable
 import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import test.test.reasons.ConditionallyDeeplyImmutableReason
+import test.test.reasons.basicInfo
 
 class PropertyDelegateConditionallyDeeplyImmutable(val type: Type, val propertyDescriptor: PropertyDescriptor) :
     ConditionallyDeeplyImmutableReason() {
@@ -14,9 +15,7 @@ class PropertyDelegateConditionallyDeeplyImmutable(val type: Type, val propertyD
             }
         override val info: String
             get() = json {
-                obj(
-                    "descriptor" to propertyDescriptor.toString()
-                )
+                obj(*propertyDescriptor.basicInfo)
             }.toJsonString(true)
     }
 

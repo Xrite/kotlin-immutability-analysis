@@ -4,6 +4,7 @@ import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.idea.util.string.collapseSpaces
 import test.test.reasons.ConditionallyDeeplyImmutableReason
+import test.test.reasons.basicInfo
 
 class ParentTypeConditionallyDeeplyImmutable(val byAssumption: Boolean, val classifierDescriptor: ClassifierDescriptor) : ConditionallyDeeplyImmutableReason() {
     override val csvData = object : CSVData {
@@ -14,9 +15,7 @@ class ParentTypeConditionallyDeeplyImmutable(val byAssumption: Boolean, val clas
             }
         override val info: String
             get() = json {
-                obj(
-                    "descriptor" to classifierDescriptor.toString()
-                )
+                obj(*classifierDescriptor.basicInfo)
             }.toJsonString(true)
     }
 }

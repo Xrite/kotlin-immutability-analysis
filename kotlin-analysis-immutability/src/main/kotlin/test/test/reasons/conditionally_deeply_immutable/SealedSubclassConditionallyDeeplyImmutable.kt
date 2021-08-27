@@ -3,6 +3,7 @@ package test.test.reasons.conditionally_deeply_immutable
 import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import test.test.reasons.ConditionallyDeeplyImmutableReason
+import test.test.reasons.basicInfo
 
 class SealedSubclassConditionallyDeeplyImmutable(val type: Type, val classifierDescriptor: ClassifierDescriptor) : ConditionallyDeeplyImmutableReason() {
     override val csvData = object : CSVData {
@@ -13,9 +14,7 @@ class SealedSubclassConditionallyDeeplyImmutable(val type: Type, val classifierD
             }
         override val info: String
             get() = json {
-                obj(
-                    "descriptor" to classifierDescriptor.toString()
-                )
+                obj(*classifierDescriptor.basicInfo)
             }.toJsonString(true)
     }
     enum class Type {

@@ -6,6 +6,7 @@ import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import test.test.reasons.MutableReason
+import test.test.reasons.basicInfo
 
 class DelegatedProperty(val descriptor: VariableDescriptor) : MutableReason() {
     override val csvData = object : CSVData {
@@ -13,10 +14,7 @@ class DelegatedProperty(val descriptor: VariableDescriptor) : MutableReason() {
         override val info: String
             get() =
                 json {
-                    obj(
-                        "desc" to descriptor.toString(),
-                        "fqName" to descriptor.fqNameSafe.asString()
-                    )
+                    obj(*descriptor.basicInfo)
                 }.toJsonString(true)
     }
 }

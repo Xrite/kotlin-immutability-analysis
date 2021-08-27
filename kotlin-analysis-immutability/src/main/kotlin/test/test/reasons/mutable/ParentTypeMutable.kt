@@ -4,6 +4,7 @@ import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import test.test.reasons.MutableReason
+import test.test.reasons.basicInfo
 
 class ParentTypeMutable(val type: Type, val parentDescriptor: ClassifierDescriptor) : MutableReason() {
     override val csvData = object : CSVData {
@@ -16,9 +17,8 @@ class ParentTypeMutable(val type: Type, val parentDescriptor: ClassifierDescript
         override val info: String
             get() = json {
                 obj(
-                    "descriptor" to parentDescriptor.toString(),
-                    "source" to parentDescriptor.source.containingFile.name,
-                    "fqName" to parentDescriptor.fqNameSafe.asString()
+                    "fqName" to parentDescriptor.fqNameSafe.asString(),
+                    *parentDescriptor.basicInfo
                 )
             }.toJsonString(true)
     }

@@ -4,6 +4,7 @@ import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.idea.util.string.collapseSpaces
 import test.test.reasons.ShallowImmutableReason
+import test.test.reasons.basicInfo
 
 class ValPropertyShallowImmutable(val type: Type, val isParameter: Boolean, val variableDescriptor: VariableDescriptor) : ShallowImmutableReason() {
     override val csvData = object : CSVData {
@@ -20,9 +21,7 @@ class ValPropertyShallowImmutable(val type: Type, val isParameter: Boolean, val 
             }
         override val info: String
             get() = json {
-                obj(
-                    "descriptor" to variableDescriptor.toString()
-                )
+                obj(*variableDescriptor.basicInfo)
             }.toJsonString(true)
     }
 

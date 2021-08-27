@@ -3,6 +3,7 @@ package test.test.reasons.mutable
 import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import test.test.reasons.MutableReason
+import test.test.reasons.basicInfo
 
 class PropertyDelegateMutable(val type: Type, val propertyDescriptor: PropertyDescriptor) : MutableReason() {
     override val csvData = object : CSVData {
@@ -16,9 +17,7 @@ class PropertyDelegateMutable(val type: Type, val propertyDescriptor: PropertyDe
             }
         override val info: String
             get() = json {
-                obj(
-                    "descriptor" to propertyDescriptor.toString(),
-                )
+                obj(*propertyDescriptor.basicInfo)
             }.toJsonString(true)
     }
 
