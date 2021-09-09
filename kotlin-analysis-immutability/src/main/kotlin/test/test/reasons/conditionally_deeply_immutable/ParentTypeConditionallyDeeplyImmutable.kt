@@ -13,9 +13,7 @@ class ParentTypeConditionallyDeeplyImmutable(val byAssumption: Boolean, val clas
                 val assumption = if (byAssumption) " (assumption)" else ""
                 return "Parent type conditionally deeply immutable $assumption".collapseSpaces()
             }
-        override val info: String
-            get() = json {
-                obj(*classifierDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*classifierDescriptor.basicInfo)
     }
 }

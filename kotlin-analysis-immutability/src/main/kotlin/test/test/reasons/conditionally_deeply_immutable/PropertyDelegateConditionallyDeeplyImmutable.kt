@@ -13,10 +13,8 @@ class PropertyDelegateConditionallyDeeplyImmutable(val type: Type, val propertyD
                 Type.CONDITIONALLY_DEEPLY_IMMUTABLE_BY_ASSUMPTION -> "Property delegate conditionally deeply immutable (assumption)"
                 Type.CONDITIONALLY_DEEPLY_IMMUTABLE -> "Property delegate conditionally deeply immutable"
             }
-        override val info: String
-            get() = json {
-                obj(*propertyDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*propertyDescriptor.basicInfo)
     }
 
     enum class Type {

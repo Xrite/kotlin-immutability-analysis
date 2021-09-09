@@ -10,9 +10,7 @@ class MayHaveMutableSubclass(val classifierDescriptor: ClassifierDescriptor) : M
         get() = object : CSVData {
             override val reason: String
                 get() = "May have mutable subclass"
-            override val info: String
-                get() = json {
-                    obj(*classifierDescriptor.basicInfo)
-                }.toJsonString(true)
+            override val info: Map<String, Any?>
+                get() = mapOf(*classifierDescriptor.basicInfo)
         }
 }

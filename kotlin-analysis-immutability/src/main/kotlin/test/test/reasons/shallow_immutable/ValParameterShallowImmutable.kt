@@ -18,10 +18,8 @@ class ValParameterShallowImmutable(val type: Type, val parameterDescriptor: Valu
                     Type.SHALLOW_IMMUTABLE -> "val (parameter) refers to shallow immutable type"
                 }.collapseSpaces()
             }
-        override val info: String
-            get() = json {
-                obj(*parameterDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*parameterDescriptor.basicInfo)
     }
 
     enum class Type {

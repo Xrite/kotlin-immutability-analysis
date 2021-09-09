@@ -14,9 +14,7 @@ class ValPropertyConditionallyDeeplyImmutable(val byAssumption: Boolean, val pro
                 val assumption = if (byAssumption) "(assumption)" else ""
                 return "val refers to conditionally deeply immutable type $assumption".collapseSpaces()
             }
-        override val info: String
-            get() = json {
-                obj(*propertyDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*propertyDescriptor.basicInfo)
     }
 }

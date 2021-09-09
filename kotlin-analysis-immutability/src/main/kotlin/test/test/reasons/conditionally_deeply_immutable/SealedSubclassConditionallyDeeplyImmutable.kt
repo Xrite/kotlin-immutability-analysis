@@ -12,10 +12,8 @@ class SealedSubclassConditionallyDeeplyImmutable(val type: Type, val classifierD
                 Type.CONDITIONALLY_DEEPLY_IMMUTABLE_BY_ASSUMPTION -> "sealed subclass conditionally deeply immutable (assumption)"
                 Type.CONDITIONALLY_DEEPLY_IMMUTABLE -> "sealed subclass conditionally deeply immutable"
             }
-        override val info: String
-            get() = json {
-                obj(*classifierDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*classifierDescriptor.basicInfo)
     }
     enum class Type {
         CONDITIONALLY_DEEPLY_IMMUTABLE_BY_ASSUMPTION,

@@ -14,13 +14,12 @@ class ParentTypeMutable(val type: Type, val parentDescriptor: ClassifierDescript
                 Type.UNKNOWN -> "Parent type unknown"
                 Type.MUTABLE -> "Parent type mutable"
             }
-        override val info: String
-            get() = json {
-                obj(
+        override val info: Map<String, Any?>
+            get() =
+                mapOf(
                     "fqName" to parentDescriptor.fqNameSafe.asString(),
                     *parentDescriptor.basicInfo
                 )
-            }.toJsonString(true)
     }
     enum class Type {
         MUTABLE_BY_ASSUMPTION,

@@ -15,9 +15,7 @@ class OuterClassTypeConditionallyDeeplyImmutable(val byAssumption: Boolean, val 
                 val assumption = if (byAssumption) " (assumption)" else ""
                 return "Outer class conditionally deeply immutable $assumption".collapseSpaces()
             }
-        override val info: String
-            get() = json {
-                obj(*classifierDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*classifierDescriptor.basicInfo)
     }
 }

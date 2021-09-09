@@ -12,10 +12,8 @@ class SealedSubclassShallowImmutable(val type: Type, val classifierDescriptor: C
                 Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION -> "sealed subclass shallow immutable (assumption)"
                 Type.SHALLOW_IMMUTABLE -> "sealed subclass shallow immutable"
             }
-        override val info: String
-            get() = json {
-                obj(*classifierDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*classifierDescriptor.basicInfo)
     }
     enum class Type {
         SHALLOW_IMMUTABLE_BY_ASSUMPTION,

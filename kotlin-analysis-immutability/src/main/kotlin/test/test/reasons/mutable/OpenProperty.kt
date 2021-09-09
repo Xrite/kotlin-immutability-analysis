@@ -11,9 +11,7 @@ class OpenProperty(val propertyDescriptor: PropertyDescriptor) : MutableReason()
     override val csvData = object : CSVData {
         override val reason: String
             get() = "open property"
-        override val info: String
-            get() = json {
-                obj(*propertyDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*propertyDescriptor.basicInfo)
     }
 }

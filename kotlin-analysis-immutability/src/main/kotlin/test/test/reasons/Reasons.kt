@@ -4,13 +4,12 @@ sealed class Reason {
     open fun isByAssumption(): Boolean = false
     open val csvData = object : CSVData {
         override val reason = ""
-        override val info = ""
     }
 
     interface CSVData {
         val reason: String
-        val info: String
-            get() = ""
+        val info: Map<String, Any?>
+            get() = mapOf()
     }
 }
 

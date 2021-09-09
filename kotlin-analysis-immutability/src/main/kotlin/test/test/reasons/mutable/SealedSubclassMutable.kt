@@ -15,10 +15,8 @@ class SealedSubclassMutable(val type: Type, val classifierDescriptor: Classifier
                 Type.UNKNOWN -> "sealed subclass unknown"
                 Type.MUTABLE -> "sealed subclass mutable"
             }
-        override val info: String
-            get() = json {
-                obj(*classifierDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*classifierDescriptor.basicInfo)
     }
     enum class Type {
         MUTABLE_BY_ASSUMPTION,

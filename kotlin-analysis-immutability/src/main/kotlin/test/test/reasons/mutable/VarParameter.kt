@@ -9,9 +9,7 @@ class VarParameter(val variableDescriptor: ValueParameterDescriptor) : MutableRe
     override val csvData = object : CSVData {
         override val reason: String
             get() = "var (parameter)"
-        override val info: String
-            get() = json {
-                obj(*variableDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*variableDescriptor.basicInfo)
     }
 }

@@ -11,7 +11,7 @@ import java.nio.file.Path
 
 class CSVWriterResourceManager(private val directory: Path, private val fileName: String) : ResourceManager {
     private val header =
-        listOf("project", "name", "type", "immutability", "tests", "reason", "info") + TaskConfiguration.flags
+        listOf("project", "name", "type", "immutability", "tests", "reason", "infoKeys", "infoValues") + TaskConfiguration.flags
 
     fun addResult(
         projectName: String,
@@ -36,16 +36,33 @@ class CSVWriterResourceManager(private val directory: Path, private val fileName
             }
             status.reasons.forEach {
                 val data = it.csvData
-                printer.printRecord(
-                    projectName,
-                    name,
-                    type,
-                    result,
-                    tests,
-                    data.reason,
-                    data.info,
-                    *taskConfiguration.values.toTypedArray()
-                )
+                if (data.info.isEmpty()) {
+                    printer.printRecord(
+                        projectName,
+                        name,
+                        type,
+                        result,
+                        tests,
+                        data.reason,
+                        "",
+                        "",
+                        *taskConfiguration.values.toTypedArray()
+                    )
+                } else {
+                    data.info.forEach { (infoKey, infoValue) ->
+                        printer.printRecord(
+                            projectName,
+                            name,
+                            type,
+                            result,
+                            tests,
+                            data.reason,
+                            infoKey,
+                            infoValue,
+                            *taskConfiguration.values.toTypedArray()
+                        )
+                    }
+                }
             }
         }
     }

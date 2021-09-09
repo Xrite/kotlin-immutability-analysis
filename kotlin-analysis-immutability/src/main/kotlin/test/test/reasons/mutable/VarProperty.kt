@@ -11,9 +11,7 @@ class VarProperty(val variableDescriptor: PropertyDescriptor) : MutableReason() 
     override val csvData = object : CSVData {
         override val reason: String
             get() = "var"
-        override val info: String
-            get() = json {
-                obj(*variableDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*variableDescriptor.basicInfo)
     }
 }

@@ -15,10 +15,8 @@ class PropertyDelegateMutable(val type: Type, val propertyDescriptor: PropertyDe
                 Type.SHALLOW_IMMUTABLE -> "Property delegate shallow immutable"
                 Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION -> "Property delegate shallow immutable (assumption)"
             }
-        override val info: String
-            get() = json {
-                obj(*propertyDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*propertyDescriptor.basicInfo)
     }
 
     enum class Type {

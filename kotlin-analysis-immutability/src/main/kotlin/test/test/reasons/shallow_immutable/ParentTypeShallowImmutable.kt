@@ -8,9 +8,7 @@ import test.test.reasons.basicInfo
 class ParentTypeShallowImmutable(val byAssumption: Boolean, val classifierDescriptor: ClassifierDescriptor) : ShallowImmutableReason() {
     override val csvData = object : CSVData {
         override val reason = "Parent type shallow immutable"
-        override val info: String
-            get() = json {
-                obj(*classifierDescriptor.basicInfo)
-            }.toJsonString(true)
+        override val info: Map<String, Any?>
+            get() = mapOf(*classifierDescriptor.basicInfo)
     }
 }
