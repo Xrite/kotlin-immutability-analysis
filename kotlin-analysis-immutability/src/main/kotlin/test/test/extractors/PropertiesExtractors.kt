@@ -1,5 +1,6 @@
 package test.test.extractors
 
+import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.idea.analysis.computeTypeInContext
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
@@ -36,8 +37,8 @@ typealias F = (KtProperty, VariableDescriptor) -> Dependency?
 fun extractBase(property: KtProperty, descriptor: VariableDescriptor): Dependency =
     when {
         descriptor.isExtensionProperty -> ExtensionProperty.fromDescriptor(descriptor)
-        descriptor.isVar -> VarProperty.fromDescriptor(descriptor)
-        else -> ValProperty.fromDescriptor(descriptor)
+        descriptor.isVar -> VarProperty.fromDescriptor(descriptor as PropertyDescriptor)
+        else -> ValProperty.fromDescriptor(descriptor as PropertyDescriptor)
     }
 
 fun extractDelegate(property: KtProperty, descriptor: VariableDescriptor): Dependency? =

@@ -1,6 +1,6 @@
 package test.test.dependencies
 
-import org.jetbrains.kotlin.descriptors.VariableDescriptor
+import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
 import test.test.ImmutabilityProperty
@@ -10,13 +10,13 @@ import test.test.reasons.shallow_immutable.ValPropertyShallowImmutable
 import test.test.reasons.conditionally_deeply_immutable.ValPropertyConditionallyDeeplyImmutable
 
 data class ValProperty(
-    val desc: VariableDescriptor,
+    val desc: PropertyDescriptor,
     val type: KotlinType,
     val debug: List<Any?> = listOf()
 ) :
     Dependency() {
     companion object {
-        fun fromDescriptor(desc: VariableDescriptor): Dependency =
+        fun fromDescriptor(desc: PropertyDescriptor): Dependency =
             ValProperty(desc, desc.type, listOf(desc.type.arguments))
     }
 
@@ -27,12 +27,10 @@ data class ValProperty(
                 val reason = when (status.reason) {
                     ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ValPropertyConditionallyDeeplyImmutable(
                         byAssumption = true,
-                        isParameter = false,
                         property
                     )
                     ConditionallyDeeplyImmutable.Reason.RESOLVED -> ValPropertyConditionallyDeeplyImmutable(
                         byAssumption = false,
-                        isParameter = false,
                         property
                     )
                 }
@@ -43,17 +41,14 @@ data class ValProperty(
                 val reason = when (status.reason) {
                     Mutable.Reason.ASSUMPTION -> ValPropertyShallowImmutable(
                         ValPropertyShallowImmutable.Type.MUTABLE_BY_ASSUMPTION,
-                        false,
                         property
                     )
                     Mutable.Reason.UNKNOWN -> ValPropertyShallowImmutable(
                         ValPropertyShallowImmutable.Type.UNKNOWN,
-                        false,
                         property
                     )
                     Mutable.Reason.RESOLVED -> ValPropertyShallowImmutable(
                         ValPropertyShallowImmutable.Type.MUTABLE,
-                        false,
                         property
                     )
                 }
@@ -63,12 +58,10 @@ data class ValProperty(
                 val reason = when (status.reason) {
                     ShallowImmutable.Reason.ASSUMPTION -> ValPropertyShallowImmutable(
                         ValPropertyShallowImmutable.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION,
-                        false,
                         property
                     )
                     ShallowImmutable.Reason.RESOLVED -> ValPropertyShallowImmutable(
                         ValPropertyShallowImmutable.Type.SHALLOW_IMMUTABLE,
-                        false,
                         property
                     )
                 }

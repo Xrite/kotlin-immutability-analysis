@@ -1,11 +1,11 @@
 package test.test.dependencies
 
+import org.jetbrains.kotlin.descriptors.ParameterDescriptor
 import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.types.KotlinType
 import test.test.Dependency
 import test.test.ImmutabilityProperty
 import test.test.ImmutabilityWithContext
-import test.test.reasons.mutable.VarProperty
 
 data class VarParameter(
     val desc: ValueParameterDescriptor,
@@ -19,5 +19,5 @@ data class VarParameter(
     }
 
     override fun recalculate(immutability: ImmutabilityWithContext): ImmutabilityProperty =
-        ImmutabilityProperty.Mutable(VarProperty(true, desc))
+        ImmutabilityProperty.Mutable(test.test.reasons.mutable.VarParameter(desc))
 }

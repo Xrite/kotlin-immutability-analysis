@@ -6,8 +6,8 @@ import test.test.Dependency
 import test.test.ImmutabilityProperty
 import test.test.ImmutabilityWithContext
 import test.test.ImmutabilityWithContext.Result.*
-import test.test.reasons.shallow_immutable.ValPropertyShallowImmutable
-import test.test.reasons.conditionally_deeply_immutable.ValPropertyConditionallyDeeplyImmutable
+import test.test.reasons.conditionally_deeply_immutable.ValParameterConditionallyDeeplyImmutable
+import test.test.reasons.shallow_immutable.ValParameterShallowImmutable
 
 data class ValParameter(
     val desc: ValueParameterDescriptor,
@@ -25,14 +25,12 @@ data class ValParameter(
         return when (val status = immutability.resolveType(type)) {
             is ConditionallyDeeplyImmutable -> {
                 val reason = when (status.reason) {
-                    ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ValPropertyConditionallyDeeplyImmutable(
+                    ConditionallyDeeplyImmutable.Reason.ASSUMPTION -> ValParameterConditionallyDeeplyImmutable(
                         byAssumption = true,
-                        isParameter = true,
                         parameter
                     )
-                    ConditionallyDeeplyImmutable.Reason.RESOLVED -> ValPropertyConditionallyDeeplyImmutable(
+                    ConditionallyDeeplyImmutable.Reason.RESOLVED -> ValParameterConditionallyDeeplyImmutable(
                         byAssumption = false,
-                        isParameter = true,
                         parameter
                     )
                 }
@@ -41,19 +39,16 @@ data class ValParameter(
             is Immutable -> ImmutabilityProperty.Immutable()
             is Mutable -> {
                 val reason = when (status.reason) {
-                    Mutable.Reason.ASSUMPTION -> ValPropertyShallowImmutable(
-                        ValPropertyShallowImmutable.Type.MUTABLE_BY_ASSUMPTION,
-                        true,
+                    Mutable.Reason.ASSUMPTION -> ValParameterShallowImmutable(
+                        ValParameterShallowImmutable.Type.MUTABLE_BY_ASSUMPTION,
                         parameter
                     )
-                    Mutable.Reason.UNKNOWN -> ValPropertyShallowImmutable(
-                        ValPropertyShallowImmutable.Type.UNKNOWN,
-                        true,
+                    Mutable.Reason.UNKNOWN -> ValParameterShallowImmutable(
+                        ValParameterShallowImmutable.Type.UNKNOWN,
                         parameter
                     )
-                    Mutable.Reason.RESOLVED -> ValPropertyShallowImmutable(
-                        ValPropertyShallowImmutable.Type.MUTABLE,
-                        true,
+                    Mutable.Reason.RESOLVED -> ValParameterShallowImmutable(
+                        ValParameterShallowImmutable.Type.MUTABLE,
                         parameter
                     )
                 }
@@ -61,14 +56,12 @@ data class ValParameter(
             }
             is ShallowImmutable -> {
                 val reason = when (status.reason) {
-                    ShallowImmutable.Reason.ASSUMPTION -> ValPropertyShallowImmutable(
-                        ValPropertyShallowImmutable.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION,
-                        true,
+                    ShallowImmutable.Reason.ASSUMPTION -> ValParameterShallowImmutable(
+                        ValParameterShallowImmutable.Type.SHALLOW_IMMUTABLE_BY_ASSUMPTION,
                         parameter
                     )
-                    ShallowImmutable.Reason.RESOLVED -> ValPropertyShallowImmutable(
-                        ValPropertyShallowImmutable.Type.SHALLOW_IMMUTABLE,
-                        true,
+                    ShallowImmutable.Reason.RESOLVED -> ValParameterShallowImmutable(
+                        ValParameterShallowImmutable.Type.SHALLOW_IMMUTABLE,
                         parameter
                     )
                 }

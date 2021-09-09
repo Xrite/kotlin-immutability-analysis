@@ -1,22 +1,22 @@
 package test.test.reasons.conditionally_deeply_immutable
 
 import com.beust.klaxon.json
-import org.jetbrains.kotlin.descriptors.PropertyDescriptor
+import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.idea.util.string.collapseSpaces
 import test.test.reasons.ConditionallyDeeplyImmutableReason
 import test.test.reasons.basicInfo
 
-class ValPropertyConditionallyDeeplyImmutable(val byAssumption: Boolean, val propertyDescriptor: PropertyDescriptor) :
+class ValParameterConditionallyDeeplyImmutable(val byAssumption: Boolean, val parameterDescriptor: ValueParameterDescriptor) :
     ConditionallyDeeplyImmutableReason() {
     override val csvData = object : CSVData {
         override val reason: String
             get() {
                 val assumption = if (byAssumption) "(assumption)" else ""
-                return "val refers to conditionally deeply immutable type $assumption".collapseSpaces()
+                return "val (parameter) refers to conditionally deeply immutable type $assumption".collapseSpaces()
             }
         override val info: String
             get() = json {
-                obj(*propertyDescriptor.basicInfo)
+                obj(*parameterDescriptor.basicInfo)
             }.toJsonString(true)
     }
 }
