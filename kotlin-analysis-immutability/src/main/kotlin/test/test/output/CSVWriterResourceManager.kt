@@ -11,7 +11,8 @@ import java.nio.file.Path
 
 class CSVWriterResourceManager(private val directory: Path, private val fileName: String) : ResourceManager {
     private val header =
-        listOf("project", "name", "type", "immutability", "tests", "reason", "infoKeys", "infoValues") + TaskConfiguration.flags
+        listOf("project", "name", "type", "immutability", "tests", "reason", "infoKeys", "infoValues") +
+                TaskConfiguration.flags.map { "config_$it" }
 
     fun addResult(
         projectName: String,
