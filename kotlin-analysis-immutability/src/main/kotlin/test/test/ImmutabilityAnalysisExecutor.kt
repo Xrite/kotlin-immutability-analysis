@@ -43,9 +43,13 @@ class ImmutabilityAnalysisExecutor(
     override val controlledResourceManagers: Set<ResourceManager> =
         withWriter.map { it.second }.toSet() + (joinWriter?.let { setOf(it) } ?: setOf())
 
+    private var cnt = 0
+
     @OptIn(ExperimentalTime::class)
     override fun analyse(project: Project) {
         val rf: ResolutionFacade? = null
+        cnt += 1
+        println("Project #$cnt")
 
         withWriter.forEach { (configuration, dataWriter) ->
             val extractor = makeExtractor(rf, configuration)

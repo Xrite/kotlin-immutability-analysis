@@ -6,12 +6,13 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.research.ml.kotlinAnalysis.ResourceManager
 import test.test.*
 import test.test.extractors.TestsType
+import test.test.reasons.containingFilePath
 import java.io.File
 import java.nio.file.Path
 
 class CSVWriterResourceManager(private val directory: Path, private val fileName: String) : ResourceManager {
     private val header =
-        listOf("project", "name", "type", "immutability", "tests", "reason", "infoKeys", "infoValues") +
+        listOf("project", "name", "type", "immutability", "tests", "containingFile", "reasonNumber", "reason", "infoKeys", "infoValues") +
                 TaskConfiguration.flags.map { "config_$it" }
 
     fun addResult(
@@ -35,8 +36,12 @@ class CSVWriterResourceManager(private val directory: Path, private val fileName
                 is ClassTemplate -> entity.classType.name
                 ErrorTemplate -> "ERROR"
             }
-            status.reasons.forEach {
-                val data = it.csvData
+            val containingFile = when (entity) {
+                is ClassTemplate -> entity.desc.containingFilePath
+                ErrorTemplate -> null
+            }
+            status.reasons.forEachIndexed { i, reason ->
+                val data = reason.csvData
                 if (data.info.isEmpty()) {
                     printer.printRecord(
                         projectName,
@@ -44,6 +49,8 @@ class CSVWriterResourceManager(private val directory: Path, private val fileName
                         type,
                         result,
                         tests,
+                        containingFile,
+                        i,
                         data.reason,
                         "",
                         "",
@@ -57,6 +64,8 @@ class CSVWriterResourceManager(private val directory: Path, private val fileName
                             type,
                             result,
                             tests,
+                            containingFile,
+                            i,
                             data.reason,
                             infoKey,
                             infoValue,
