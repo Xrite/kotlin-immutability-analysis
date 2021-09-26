@@ -1,36 +1,20 @@
 package org.jetbrains.research.ml.kotlinAnalysis
 
-import com.intellij.ide.impl.ProjectUtil
-import com.intellij.openapi.externalSystem.importing.ImportSpecBuilder
-import com.intellij.openapi.externalSystem.util.ExternalSystemUtil
-import com.intellij.openapi.project.Project
-import org.jetbrains.idea.maven.project.MavenProjectsManager
-import org.jetbrains.plugins.gradle.util.GradleConstants
+import org.jetbrains.research.ml.kotlinAnalysis.util.RepositoryOpenerUtil
+import org.jetbrains.research.pluginUtilities.runners.BaseRunner
+import org.jetbrains.research.pluginUtilities.runners.IORunnerArgs
+import org.jetbrains.research.pluginUtilities.runners.IORunnerArgsParser
 import test.test.ImmutabilityAnalysisExecutor
-import java.nio.file.Paths
+import test.test.loadConfig
 
 
-object KotlinImmutabilityAnalysisRunner : KotlinAnalysisRunner<IORunnerArgs, IORunnerArgsParser>
+object KotlinImmutabilityAnalysisRunner : BaseRunner<IORunnerArgs, IORunnerArgsParser>
     ("kotlin-immutability-analysis", IORunnerArgsParser) {
     override fun run(args: IORunnerArgs) {
-        ImmutabilityAnalysisExecutor(args.outputDir, args.inputDir).execute(args.inputDir) { projectPath ->
-            setUpProject(projectPath.toString())
+        val config = loadConfig(args.inputDir)
+        val executors = config.tasks.map {
+            ImmutabilityAnalysisExecutor(args.outputDir, it)
         }
-    }
-
-    private fun setUpProject(projectPath: String): Project {
-        val project: Project = ProjectUtil.openOrImport(Paths.get(projectPath))
-
-        if (MavenProjectsManager.getInstance(project).isMavenizedProject) {
-            MavenProjectsManager.getInstance(project).scheduleImportAndResolve()
-            MavenProjectsManager.getInstance(project).importProjects()
-        } else {
-            ExternalSystemUtil.refreshProject(
-                projectPath,
-                ImportSpecBuilder(project, GradleConstants.SYSTEM_ID)
-            )
-        }
-
-        return project
+        MultipleAnalysisExecutor(executors).execute(args.inputDir, RepositoryOpenerUtil::openReloadRepositoryOpener)
     }
 }

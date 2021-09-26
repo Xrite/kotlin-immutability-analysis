@@ -15,7 +15,7 @@ import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
-import org.jetbrains.research.ml.kotlinAnalysis.psi.PsiProvider
+import org.jetbrains.research.ml.kotlinAnalysis.psi.extentions.extractElementsOfType
 import org.jetbrains.research.ml.kotlinAnalysis.util.isKotlinRelatedFile
 import test.test.*
 import test.test.dependencies.Error
@@ -79,12 +79,9 @@ class Packer(private val resolutionFacade: ResolutionFacade?) {
 
 fun extractPsiFilesWithoutTests(project: Project): Set<PsiFile>? {
     val projectPsiFiles = mutableSetOf<PsiFile>()
-    //val projectRootManager = ProjectRootManager.getInstance(project)
     val psiManager = PsiManager.getInstance(project)
     ModuleManager.getInstance(project).modules.forEach {
-        //println("module: $it")
         ModuleRootManager.getInstance(it).getSourceRoots(false).forEach {
-            //println(it)
             VfsUtilCore.iterateChildrenRecursively(it, null) { virtualFile ->
                 if (!virtualFile.isKotlinRelatedFile() || virtualFile.canonicalPath == null) {
                     return@iterateChildrenRecursively true
@@ -135,7 +132,7 @@ fun <T : PsiElement> extractElementsOfTypeFromProject(
             .flatten(), TestsType.WITHOUT_TEST_MODULES)
     } else {
         return ExtractionResult.Opened(
-            PsiProvider.extractElementsOfTypeFromProject(project, psiElementClass),
+            project.extractElementsOfType(psiElementClass),
             TestsType.WITH_TESTS
         )
     }

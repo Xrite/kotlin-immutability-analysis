@@ -1,9 +1,6 @@
 package test.test.reasons.mutable
 
-import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
-import org.jetbrains.kotlin.descriptors.VariableDescriptor
-import org.jetbrains.kotlin.idea.util.string.collapseSpaces
 import test.test.reasons.MutableReason
 import test.test.reasons.basicInfo
 

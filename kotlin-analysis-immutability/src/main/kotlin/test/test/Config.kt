@@ -1,5 +1,14 @@
 package test.test
 
+import com.sksamuel.hoplite.ConfigLoader
+import com.sksamuel.hoplite.PropertySource
+import com.sksamuel.hoplite.decoder.BooleanDecoder
+import com.sksamuel.hoplite.decoder.DataClassDecoder
+import com.sksamuel.hoplite.decoder.ListDecoder
+import com.sksamuel.hoplite.decoder.StringDecoder
+import com.sksamuel.hoplite.yaml.YamlParser
+import java.io.File
+import java.nio.file.Path
 import kotlin.reflect.full.memberProperties
 
 data class Config(val tasks: List<TaskConfiguration>, val joinOutputFile: String? = null)
@@ -16,6 +25,17 @@ data class TaskConfiguration(
 ) {
     companion object
 }
+
+fun loadConfig(inputDir: Path): Config = ConfigLoader.Builder()
+    .addSource(PropertySource.file(File(inputDir.toFile(), "config.yaml")))
+    .addDecoder(ListDecoder())
+    .addDecoder(DataClassDecoder())
+    .addDecoder(BooleanDecoder())
+    .addDecoder(StringDecoder())
+    .addFileExtensionMapping("yaml", YamlParser())
+    .build()
+    .loadConfigOrThrow<Config>()
+
 
 val TaskConfiguration.Companion.flags: List<String>
     get() = TaskConfiguration::class.memberProperties.map { it.name }

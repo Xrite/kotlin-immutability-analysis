@@ -1,6 +1,5 @@
 package test.test.reasons.mutable
 
-import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import test.test.reasons.MutableReason

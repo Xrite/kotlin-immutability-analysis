@@ -2,7 +2,7 @@ group = rootProject.group
 version = rootProject.version
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "5.2.0" apply true
+    id("com.github.johnrengelman.shadow") version "6.1.0" apply true
 }
 
 repositories {
@@ -24,7 +24,12 @@ open class KotlinAnalysisCliTask : org.jetbrains.intellij.tasks.RunIdeTask() {
     val output: String? by project
 
     init {
-        jvmArgs = listOf("-Djava.awt.headless=true", "--add-exports", "java.base/jdk.internal.vm=ALL-UNNAMED")
+        jvmArgs = listOf(
+            "-Djava.awt.headless=true",
+            "--add-exports",
+            "java.base/jdk.internal.vm=ALL-UNNAMED",
+            "-Djdk.module.illegalAccess.silent=true"
+        )
         maxHeapSize = "20g"
         standardInput = System.`in`
         standardOutput = System.`out`
@@ -36,6 +41,7 @@ dependencies {
     implementation(project(":kotlin-analysis-clones"))
     implementation(project(":kotlin-analysis-dependencies"))
     implementation(project(":kotlin-analysis-statistic"))
+    implementation(project(":kotlin-analysis-gradle"))
     implementation(project(":kotlin-analysis-immutability"))
 //  TODO: psiminer dependency caused an error because of different versions of kotlin and intellij
 //    implementation("org.jetbrains.research.psiminer:psiminer") {

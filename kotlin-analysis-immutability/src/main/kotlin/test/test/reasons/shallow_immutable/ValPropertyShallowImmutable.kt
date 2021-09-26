@@ -1,6 +1,5 @@
 package test.test.reasons.shallow_immutable
 
-import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.idea.util.string.collapseSpaces
 import test.test.reasons.ShallowImmutableReason

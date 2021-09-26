@@ -1,16 +1,16 @@
 package org.jetbrains.research.ml.kotlinAnalysis.util
 
 import com.intellij.openapi.vfs.VirtualFile
+import org.jetbrains.research.pluginUtilities.util.Extension
 import java.io.File
 import java.io.PrintWriter
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.streams.toList
 
-enum class Extension(val value: String) {
-    KT("kt"),
-    KTS("kts"),
-    TXT("txt")
+enum class KotlinConstants(val value: String) {
+    OGR_JETBRAINS_KOTLIN("org.jetbrains.kotlin"),
+    KOTLIN("kotlin")
 }
 
 fun VirtualFile.isKotlinRelatedFile(): Boolean {

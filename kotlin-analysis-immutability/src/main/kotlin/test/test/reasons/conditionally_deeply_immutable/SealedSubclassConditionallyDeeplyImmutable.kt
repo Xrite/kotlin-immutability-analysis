@@ -1,6 +1,5 @@
 package test.test.reasons.conditionally_deeply_immutable
 
-import com.beust.klaxon.json
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import test.test.reasons.ConditionallyDeeplyImmutableReason
 import test.test.reasons.basicInfo
