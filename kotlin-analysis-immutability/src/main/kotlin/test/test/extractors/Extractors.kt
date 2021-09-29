@@ -110,7 +110,6 @@ fun extractPsiFilesWithoutTestPrefix(project: Project): Set<PsiFile> {
                 return@iterateChildrenRecursively true
             }
             val psi = psiManager.findFile(virtualFile) ?: return@iterateChildrenRecursively true
-            //println(psi.virtualFile.canonicalPath)
             projectPsiFiles.add(psi)
         }
     }
