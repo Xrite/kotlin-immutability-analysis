@@ -80,5 +80,5 @@ fun join(vararg statuses: ImmutabilityProperty): ImmutabilityProperty = join(sta
 
 
 infix fun ImmutabilityProperty.hasSameStatus(other: ImmutabilityProperty): Boolean {
-    return this::class == other::class
+    return this == other
 }

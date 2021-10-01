@@ -1,5 +1,6 @@
 package org.jetbrains.research.ml.kotlinAnalysis.immutability.reasons
 
+/** Reasons should be equals if reasons are the same (not the same object) */
 sealed class Reason {
     open fun isByAssumption(): Boolean = false
     open val csvData = object : CSVData {

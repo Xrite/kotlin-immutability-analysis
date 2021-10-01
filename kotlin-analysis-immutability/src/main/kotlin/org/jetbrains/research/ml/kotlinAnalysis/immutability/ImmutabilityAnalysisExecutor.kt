@@ -40,6 +40,11 @@ class ImmutabilityAnalysisExecutor(
             println("done in $extractionTime")
             val (entities, type) = r
 
+            if (entities.isEmpty()) {
+                println("Failed to extract entities")
+                return
+            }
+
             if (!validateEntities(entities)) {
                 println("Failed to validate project")
                 return
