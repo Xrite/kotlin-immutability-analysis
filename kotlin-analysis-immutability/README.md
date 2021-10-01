@@ -7,7 +7,7 @@ Functionality related to immutability analysis in Kotlin projects
 #### 1. Download list of repositories
 
 You can use [seart-ghs.si.usi.ch]( https://seart-ghs.si.usi.ch/) (main language: Kotlin) for this purpose. The file has
-to be in csv format with ```name``` column, containing repositories' names in the following
+to be in csv format with ```name``` column (add it if it is not there), containing repositories' names in the following
 format: ```username/project_name```
 
 #### 2. Clean duplicated repositories
@@ -15,7 +15,8 @@ format: ```username/project_name```
 Run script for cleaning all duplicated repositories with different names:
 
 ``` shell script
-python3 scripts/clean_duplicates.py /path/to/csv_file/results.csv /path/to/cleaned/data/dir
+cd scripts
+python3 -m data_collection.clean_duplicates --start-from=0 /path/to/csv_file/results.csv /path/to/cleaned/data/dir
 ```
 
 You can use ```--save-metadata``` flag to download metadata about all projects. Metadata includes information about
@@ -24,16 +25,17 @@ environment variables (variable name is ```GITHUB_TOKEN```).
 
 #### 3. Load dataset
 
-Run the following command to download the dataset:
+Run the following command to download the dataset (cleaned repository csv file may contain junk lines at the top, remove it in some text editor):
 
 ``` 
-python3 scripts/load_dataset.py /path/to/cleaned/data/dir/results.csv /path/to/dataset/dir --allowed-extensions kt
+cd scripts
+python3 -m data_collection.load_dataset --start-from=0 /path/to/cleaned/data/dir/results.csv /path/to/dataset/dir
 ```
 
 #### 4. Run analysis
 Run the following command to perform the analysis on a dataset. A dataset folder must contain `config.yaml`. Configuration is described in latter sections.
 ``` 
-gradle :kotlin-analysis-plugin:cli -Prunner=kotlin-projects-tagging -Pinput=/path/to/dataset/dir -Poutput=path/to/results/dir
+./gradlew :kotlin-analysis-plugin:cli -Prunner=kotlin-immutability-analysis -Pinput=/path/to/dataset/dir -Poutput=path/to/results/dir
 ```
 ### Configuration
 Configure analysis using `config.yaml` file in your dataset folder. The configuration must be in the following format:
